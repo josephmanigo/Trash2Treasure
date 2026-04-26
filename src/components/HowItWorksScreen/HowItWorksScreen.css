@@ -1,0 +1,264 @@
+.how-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+
+.how-bg-texture {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.15;
+  pointer-events: none;
+}
+.how-bg-texture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: multiply;
+}
+
+/* ── Header ── */
+.how-header {
+  position: relative;
+  z-index: 10;
+  padding: 48px 24px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.how-back-btn {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-2);
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.how-back-btn:hover { background: var(--g10); color: var(--g600); }
+
+.how-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.5px;
+}
+
+.how-subtitle {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* ── Content ── */
+.how-content {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  padding: 24px 20px;
+}
+
+/* Hero */
+.how-hero {
+  background: linear-gradient(135deg, var(--g600), var(--g500));
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+
+.how-hero-icon {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.how-hero-text h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  color: #fff;
+}
+
+.how-hero-text p {
+  font-size: 13px;
+  color: rgba(255,255,255,0.9);
+  line-height: 1.4;
+}
+
+/* Detected Items */
+.section-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.detected-items-row {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  padding-bottom: 16px;
+  margin: 0 -20px 24px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.detected-items-row::-webkit-scrollbar { display: none; }
+
+.detected-item-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 10px 14px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.detected-icon-wrap {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--g500);
+}
+
+.detected-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+
+.detected-arrow {
+  color: var(--color-border-strong);
+}
+
+.detected-result {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--g600);
+}
+
+/* Steps */
+.how-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.how-step-card {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  border-radius: var(--radius-xl);
+  border: 1px solid;
+  transition: var(--transition);
+}
+.how-step-card:hover { transform: translateY(-2px); }
+
+.how-step-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.how-step-num {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 2px solid;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  background: var(--color-surface);
+  z-index: 2;
+}
+
+.how-step-line {
+  width: 2px;
+  flex: 1;
+  min-height: 40px;
+  margin: 4px 0 -24px;
+}
+
+.how-step-body {
+  flex: 1;
+}
+
+.how-step-icon {
+  display: inline-flex;
+  margin-bottom: 8px;
+}
+
+.how-step-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.how-step-desc {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+/* Tech Note */
+.tech-note {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  padding: 20px;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-sm);
+}
+
+.tech-note-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 12px;
+}
+
+.tech-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tech-tag {
+  background: var(--g20);
+  color: var(--g700);
+  border: 1px solid var(--g100);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* CTA */
+.how-cta {
+  width: 100%;
+}

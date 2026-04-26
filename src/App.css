@@ -1,0 +1,92 @@
+/* App shell */
+.app-root {
+  width: 100vw;
+  height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 430px;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 480px) {
+  .app-container {
+    height: 90vh;
+    max-height: 850px;
+    border-radius: 40px;
+    border: 8px solid var(--g800);
+    box-shadow: 0 24px 64px rgba(10, 31, 20, 0.4);
+    margin: auto;
+  }
+}
+
+/* ── Toast notifications ── */
+.toast-container {
+  position: fixed;
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  width: 100%;
+  max-width: 360px;
+  padding: 0 20px;
+}
+
+.toast {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Outfit', sans-serif;
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+  white-space: nowrap;
+  background: var(--color-surface);
+  color: var(--g700);
+  border: 1.5px solid var(--g100);
+}
+
+.toast-success {
+  background: var(--color-surface);
+  color: var(--g700);
+  border: 1.5px solid var(--g100);
+}
+
+.toast-success .toast-icon {
+  width: 28px; height: 28px;
+  background: var(--g50);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--g600);
+  flex-shrink: 0;
+}
+
+.toast-error {
+  background: #fff5f5;
+  color: #991b1b;
+  border: 1.5px solid #fecaca;
+}
