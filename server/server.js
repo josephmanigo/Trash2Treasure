@@ -258,8 +258,12 @@ app.post('/api/auth/logout', (req, res) => {
 });
 
 // Catch-all route to serve index.html for React Router
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
+app.use((req, res, next) => {
+  if (req.method === 'GET') {
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
+  } else {
+    next();
+  }
 });
 
 // Start server
