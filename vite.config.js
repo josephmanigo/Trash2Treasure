@@ -24,9 +24,13 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
-          'tf-vendor': ['@tensorflow/tfjs', '@tensorflow-models/coco-ssd'],
+        manualChunks(id) {
+          if (id.includes('three') || id.includes('@react-three')) {
+            return 'three-vendor';
+          }
+          if (id.includes('@tensorflow')) {
+            return 'tf-vendor';
+          }
         },
       },
     },
