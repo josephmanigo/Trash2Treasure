@@ -1,40 +1,74 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Environment } from '@react-three/drei';
 import Webcam from 'react-webcam';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import '@tensorflow/tfjs';
-import { ArrowLeft, Zap, ZapOff, RefreshCw, Camera, Layers, Search, CheckCircle, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf } from 'lucide-react';
+import { ArrowLeft, Zap, ZapOff, RefreshCw, Camera, Layers, Search, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug } from 'lucide-react';
 import { getIdeasForObject } from '../../data/recyclingIdeas';
+import { MODEL_MAP } from '../ARScreen/ideaModelMap';
 import './ScannerScreen.css';
 
 const RECYCLABLE = [
   'bottle', 'cup', 'book', 'cell phone', 'laptop', 'keyboard',
   'mouse', 'remote', 'tv', 'scissors', 'knife', 'fork', 'spoon',
   'person', 'backpack', 'handbag', 'suitcase', 'bowl', 'wine glass',
+  'vase', 'banana', 'apple', 'orange', 'broccoli', 'carrot',
+  'sandwich', 'hot dog', 'pizza', 'donut', 'cake',
+  'chair', 'couch', 'bed', 'dining table', 'bench',
+  'teddy bear', 'frisbee', 'sports ball', 'kite', 'baseball bat',
+  'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
+  'microwave', 'oven', 'toaster', 'refrigerator', 'sink',
+  'umbrella', 'tie', 'clock', 'potted plant', 'toothbrush', 'hair drier',
 ];
 
 const DEMO_ITEMS = [
-  { class: 'bottle',     label: 'Plastic Bottle', icon: Package, color: '#4ade80', score: 0.94 },
-  { class: 'cup',        label: 'Cup / Container', icon: CupSoda, color: '#60a5fa', score: 0.91 },
-  { class: 'book',       label: 'Paper / Book',    icon: BookOpen, color: '#f59e0b', score: 0.88 },
-  { class: 'cell phone', label: 'Electronics',     icon: Smartphone, color: '#a78bfa', score: 0.90 },
-  { class: 'scissors',   label: 'Metal / Tin Can', icon: Scissors, color: '#94a3b8', score: 0.86 },
-  { class: 'person',     label: 'Fabric / Clothing', icon: Shirt, color: '#f472b6', score: 0.89 },
-  { class: 'default',    label: 'Other Waste',     icon: Leaf, color: '#34d399', score: 0.82 },
+  { class: 'bottle',     label: 'Plastic Bottle',    icon: Package,    color: '#4ade80', score: 0.94 },
+  { class: 'cup',        label: 'Cup / Container',   icon: CupSoda,    color: '#60a5fa', score: 0.91 },
+  { class: 'book',       label: 'Paper / Book',      icon: BookOpen,   color: '#f59e0b', score: 0.88 },
+  { class: 'cell phone', label: 'Electronics',       icon: Smartphone, color: '#a78bfa', score: 0.90 },
+  { class: 'scissors',   label: 'Metal / Tin Can',   icon: Scissors,   color: '#94a3b8', score: 0.86 },
+  { class: 'person',     label: 'Fabric / Clothing', icon: Shirt,      color: '#f472b6', score: 0.89 },
+  { class: 'vase',       label: 'Glass / Ceramic',   icon: Droplets,   color: '#06b6d4', score: 0.87 },
+  { class: 'banana',     label: 'Food / Organic',    icon: Apple,      color: '#84cc16', score: 0.92 },
+  { class: 'chair',      label: 'Old Furniture',     icon: Armchair,   color: '#d97706', score: 0.85 },
+  { class: 'teddy bear', label: 'Toys / Sports',     icon: Heart,      color: '#ec4899', score: 0.88 },
+  { class: 'microwave',  label: 'Home Appliance',    icon: Plug,       color: '#6366f1', score: 0.84 },
+  { class: 'default',    label: 'Other Waste',       icon: Leaf,       color: '#34d399', score: 0.82 },
 ];
 
 const getClassIcon = (cls) => {
-  const item = DEMO_ITEMS.find(i => 
-    i.class === cls || 
+  const item = DEMO_ITEMS.find(i =>
+    i.class === cls ||
     (i.class === 'bottle' && cls === 'wine glass') ||
     (i.class === 'cup' && cls === 'bowl') ||
-    (i.class === 'cell phone' && ['laptop', 'keyboard', 'mouse', 'remote', 'tv'].includes(cls)) ||
-    (i.class === 'scissors' && ['knife', 'fork', 'spoon'].includes(cls)) ||
-    (i.class === 'person' && ['backpack', 'handbag', 'suitcase'].includes(cls))
+    (i.class === 'cell phone' && ['laptop', 'keyboard', 'mouse', 'remote', 'tv', 'clock', 'hair drier'].includes(cls)) ||
+    (i.class === 'scissors' && ['knife', 'fork', 'spoon', 'toothbrush'].includes(cls)) ||
+    (i.class === 'person' && ['backpack', 'handbag', 'suitcase', 'umbrella', 'tie'].includes(cls)) ||
+    (i.class === 'vase' && ['wine glass'].includes(cls)) ||
+    (i.class === 'banana' && ['apple', 'orange', 'broccoli', 'carrot', 'sandwich', 'hot dog', 'pizza', 'donut', 'cake', 'potted plant'].includes(cls)) ||
+    (i.class === 'chair' && ['couch', 'bed', 'dining table', 'bench'].includes(cls)) ||
+    (i.class === 'teddy bear' && ['frisbee', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket'].includes(cls)) ||
+    (i.class === 'microwave' && ['oven', 'toaster', 'refrigerator', 'sink'].includes(cls))
   );
   const IconComponent = item ? item.icon : Leaf;
   return <IconComponent size={20} />;
 };
+
+/* ── Mini 3D Preview Scene ── */
+function PreviewScene({ modelClass }) {
+  const ModelComponent = MODEL_MAP[modelClass] || MODEL_MAP.default;
+  return (
+    <>
+      <ambientLight intensity={0.7} />
+      <directionalLight position={[3, 5, 3]} intensity={1.2} />
+      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={6} />
+      <Environment preset="city" />
+      <ModelComponent />
+    </>
+  );
+}
 
 const ScannerScreen = ({ onBack, onDetect }) => {
   const webcamRef  = useRef(null);
@@ -82,7 +116,7 @@ const ScannerScreen = ({ onBack, onDetect }) => {
     }
     try {
       const preds    = await model.detect(video);
-      const relevant = preds.filter(p => RECYCLABLE.includes(p.class) && p.score > 0.4);
+      const relevant = preds.filter(p => RECYCLABLE.includes(p.class) && p.score > 0.35);
       if (relevant.length > 0) {
         const top = relevant.reduce((a, b) => a.score > b.score ? a : b);
         setTopDetection(top);
@@ -99,6 +133,11 @@ const ScannerScreen = ({ onBack, onDetect }) => {
     if (!loading && model) animFrame.current = requestAnimationFrame(detect);
     return () => { if (animFrame.current) cancelAnimationFrame(animFrame.current); };
   }, [detect, loading, model]);
+
+  const getFirstIdeaTitle = (cls) => {
+    const ideas = getIdeasForObject(cls);
+    return ideas?.ideas?.[0]?.title || 'Upcycled Creation';
+  };
 
   const handleCapture = () => {
     setScanning(true);
@@ -233,6 +272,31 @@ const ScannerScreen = ({ onBack, onDetect }) => {
         </p>
       </div>
 
+      {/* ── 3D Preview Panel (shows while scanning detects an item) ── */}
+      <AnimatePresence>
+        {topDetection && !scanning && (
+          <motion.div
+            className="scan-3d-preview"
+            initial={{ opacity: 0, scale: 0.7, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.7, y: 20 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 260 }}
+          >
+            <Canvas
+              camera={{ position: [0, 0.8, 2.8], fov: 52 }}
+              gl={{ antialias: true, alpha: true }}
+              style={{ background: 'transparent', width: '100%', height: '280px' }}
+            >
+              <PreviewScene modelClass={topDetection.class.toLowerCase()} />
+            </Canvas>
+            <div className="scan-3d-label">
+              <span className="scan-3d-tag">Could become</span>
+              <strong className="scan-3d-title">{getFirstIdeaTitle(topDetection.class)}</strong>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── Bottom Controls ── */}
       <div className="scanner-bottom">
         <motion.button
@@ -296,7 +360,7 @@ const ScannerScreen = ({ onBack, onDetect }) => {
                     whileHover={{ scale: 1.04, y: -2 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <div className="demo-item-icon-wrap">
+                    <div className="demo-item-icon-wrap" style={{ color: item.color }}>
                       <IconComponent size={20} />
                     </div>
                     <span className="demo-item-label">{item.label}</span>

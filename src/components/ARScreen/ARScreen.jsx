@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, Float } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Star, ChevronRight, RotateCcw, Maximize2, Share2, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf } from 'lucide-react';
+import { ArrowLeft, Star, ChevronRight, RotateCcw, Maximize2, Share2, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug } from 'lucide-react';
 import { IDEA_MODEL_MAP, MODEL_MAP } from './ideaModelMap';
 import './ARScreen.css';
 
@@ -28,9 +28,14 @@ const getClassIcon = (cls) => {
   if (['bottle', 'wine glass'].includes(l)) return <Package size={16} />;
   if (['cup', 'bowl'].includes(l)) return <CupSoda size={16} />;
   if (l === 'book') return <BookOpen size={16} />;
-  if (['cell phone', 'laptop', 'keyboard', 'mouse', 'remote', 'tv'].includes(l)) return <Smartphone size={16} />;
-  if (['scissors', 'knife', 'fork', 'spoon'].includes(l)) return <Scissors size={16} />;
-  if (['person', 'backpack', 'handbag', 'suitcase'].includes(l)) return <Shirt size={16} />;
+  if (['cell phone', 'laptop', 'keyboard', 'mouse', 'remote', 'tv', 'clock', 'hair drier'].includes(l)) return <Smartphone size={16} />;
+  if (['scissors', 'knife', 'fork', 'spoon', 'toothbrush'].includes(l)) return <Scissors size={16} />;
+  if (['person', 'backpack', 'handbag', 'suitcase', 'umbrella', 'tie'].includes(l)) return <Shirt size={16} />;
+  if (['vase'].includes(l)) return <Droplets size={16} />;
+  if (['banana', 'apple', 'orange', 'broccoli', 'carrot', 'sandwich', 'hot dog', 'pizza', 'donut', 'cake', 'potted plant'].includes(l)) return <Apple size={16} />;
+  if (['chair', 'couch', 'bed', 'dining table', 'bench'].includes(l)) return <Armchair size={16} />;
+  if (['teddy bear', 'frisbee', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket'].includes(l)) return <Heart size={16} />;
+  if (['microwave', 'oven', 'toaster', 'refrigerator', 'sink'].includes(l)) return <Plug size={16} />;
   return <Leaf size={16} />;
 };
 

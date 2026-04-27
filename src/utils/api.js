@@ -50,26 +50,60 @@ export const api = {
   },
 
   async guestLogin() {
-    const res = await fetch(`${API_BASE}/auth/guest`, {
-      method: 'POST',
-      headers: headers(false),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    localStorage.setItem('t2t_token', data.token);
-    return data;
+    try {
+      const res = await fetch(`${API_BASE}/auth/guest`, {
+        method: 'POST',
+        headers: headers(false),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      localStorage.setItem('t2t_token', data.token);
+      return data;
+    } catch (err) {
+      console.warn('Backend unavailable, using mock guest session:', err.message);
+      // Fallback for local development without MySQL
+      const mockUser = {
+        id: 9999,
+        name: 'Guest_' + Math.floor(Math.random() * 1000),
+        email: 'guest@local.dev',
+        avatar: null,
+        method: 'guest'
+      };
+      const mockToken = 'mock_jwt_token_for_local_testing';
+      localStorage.setItem('t2t_token', mockToken);
+      return { user: mockUser, token: mockToken };
+    }
   },
 
   async getMe() {
     const token = getToken();
     if (!token) return null;
-    const res = await fetch(`${API_BASE}/auth/me`, { headers: headers() });
-    if (!res.ok) {
-      localStorage.removeItem('t2t_token');
+    
+    // Handle local mock session
+    if (token === 'mock_jwt_token_for_local_testing') {
+      return {
+        user: {
+          id: 9999,
+          name: 'Local Guest',
+          email: 'guest@local.dev',
+          avatar: null,
+          method: 'guest'
+        }
+      };
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/me`, { headers: headers() });
+      if (!res.ok) {
+        localStorage.removeItem('t2t_token');
+        return null;
+      }
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.warn('Backend unavailable during getMe:', err.message);
       return null;
     }
-    const data = await res.json();
-    return data;
   },
 
   logout() {

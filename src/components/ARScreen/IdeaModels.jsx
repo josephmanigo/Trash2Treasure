@@ -376,3 +376,212 @@ export function CompostBinModel() {
     </group>
   );
 }
+
+// ──────────────────────────────────────────────────────
+//  GLASS idea g2 → Painted Decorative Vase
+// ──────────────────────────────────────────────────────
+export function PaintedVaseModel() {
+  const g = useRef();
+  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = clock.elapsedTime * 0.3; });
+  return (
+    <group ref={g} position={[0, -0.4, 0]}>
+      {/* Vase body */}
+      <mesh><cylinderGeometry args={[0.35, 0.55, 1.4, 20]} /><meshStandardMaterial color="#06b6d4" roughness={0.2} metalness={0.1} /></mesh>
+      {/* Vase neck */}
+      <mesh position={[0, 0.85, 0]}><cylinderGeometry args={[0.25, 0.35, 0.35, 16]} /><meshStandardMaterial color="#0891b2" roughness={0.2} /></mesh>
+      {/* Rim */}
+      <mesh position={[0, 1.04, 0]}><torusGeometry args={[0.26, 0.03, 8, 20]} /><meshStandardMaterial color="#0e7490" roughness={0.3} metalness={0.2} /></mesh>
+      {/* Paint stripes */}
+      {[0.1, 0.3, 0.5].map((y, i) => (<mesh key={i} position={[0, -0.2 + y, 0]}><torusGeometry args={[0.48 - i * 0.04, 0.025, 6, 20]} /><meshStandardMaterial color={['#fbbf24', '#f472b6', '#a78bfa'][i]} roughness={0.3} /></mesh>))}
+      {/* Geometric painted shapes */}
+      {[0, 90, 180, 270].map((deg, i) => {
+        const r = (deg * Math.PI) / 180;
+        return (<mesh key={`d${i}`} position={[Math.sin(r) * 0.46, 0, Math.cos(r) * 0.46]} rotation={[0, -r, 0]}>
+          <boxGeometry args={[0.15, 0.15, 0.02]} /><meshStandardMaterial color={['#ef4444', '#22c55e', '#3b82f6', '#eab308'][i]} roughness={0.3} />
+        </mesh>);
+      })}
+      {/* Dried flowers */}
+      {[[-0.05, 1.3, 0.05], [0.08, 1.4, -0.03], [-0.03, 1.25, -0.06]].map(([x, y, z], i) => (
+        <group key={`f${i}`}>
+          <mesh position={[x, y * 0.8, z]}><cylinderGeometry args={[0.01, 0.01, 0.5, 4]} /><meshStandardMaterial color="#92400e" roughness={0.9} /></mesh>
+          <mesh position={[x, y, z]}><sphereGeometry args={[0.08, 8, 8]} /><meshStandardMaterial color={['#f472b6', '#a78bfa', '#fbbf24'][i]} roughness={0.5} /></mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+// ──────────────────────────────────────────────────────
+//  ORGANIC idea o2 → Seed Bombs
+// ──────────────────────────────────────────────────────
+export function SeedBombModel() {
+  const g = useRef();
+  useFrame(({ clock }) => {
+    if (g.current) { g.current.rotation.y = clock.elapsedTime * 0.35; }
+  });
+  const colors = ['#78350f', '#92400e', '#713f12', '#854d0e', '#a16207'];
+  return (
+    <group ref={g} position={[0, -0.3, 0]}>
+      {/* Tray */}
+      <mesh position={[0, -0.1, 0]}><boxGeometry args={[1.4, 0.08, 1.0]} /><meshStandardMaterial color="#d4a574" roughness={0.8} /></mesh>
+      {/* Seed bombs in a cluster */}
+      {[[-0.35, 0, -0.2], [0, 0, 0.15], [0.35, 0, -0.1], [-0.15, 0, 0.3], [0.2, 0, 0.3], [0.0, 0.22, 0.05], [-0.2, 0.22, -0.1]].map(([x, y, z], i) => (
+        <group key={i}>
+          <mesh position={[x, 0.12 + y, z]}><sphereGeometry args={[0.16, 12, 12]} /><meshStandardMaterial color={colors[i % colors.length]} roughness={0.95} /></mesh>
+          {/* Seeds visible on surface */}
+          {[0, 120, 240].map((deg, j) => {
+            const r = (deg * Math.PI) / 180;
+            return (<mesh key={j} position={[x + Math.sin(r) * 0.12, 0.16 + y, z + Math.cos(r) * 0.12]}>
+              <sphereGeometry args={[0.02, 6, 6]} /><meshStandardMaterial color="#fbbf24" roughness={0.6} />
+            </mesh>);
+          })}
+        </group>
+      ))}
+      {/* Small sprout from one bomb */}
+      <mesh position={[-0.35, 0.35, -0.2]}><cylinderGeometry args={[0.01, 0.015, 0.2, 6]} /><meshStandardMaterial color="#22c55e" roughness={0.7} /></mesh>
+      <mesh position={[-0.35, 0.48, -0.2]} rotation={[0, 0, 0.3]}><sphereGeometry args={[0.06, 8, 6]} /><meshStandardMaterial color="#4ade80" roughness={0.6} /></mesh>
+    </group>
+  );
+}
+
+// ──────────────────────────────────────────────────────
+//  FURNITURE idea fu2 → Garden Planter Box
+// ──────────────────────────────────────────────────────
+export function PlanterBoxModel() {
+  const g = useRef();
+  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = clock.elapsedTime * 0.28; });
+  return (
+    <group ref={g} position={[0, -0.3, 0]}>
+      {/* Drawer box */}
+      <mesh position={[0, 0, 0]}><boxGeometry args={[1.2, 0.5, 0.7]} /><meshStandardMaterial color="#92400e" roughness={0.75} /></mesh>
+      {/* Drawer face detail */}
+      <mesh position={[0, 0, 0.36]}><boxGeometry args={[1.1, 0.4, 0.02]} /><meshStandardMaterial color="#78350f" roughness={0.7} /></mesh>
+      {/* Drawer handle */}
+      <mesh position={[0, 0, 0.38]}><boxGeometry args={[0.25, 0.04, 0.04]} /><meshStandardMaterial color="#d4a574" roughness={0.4} metalness={0.3} /></mesh>
+      {/* Soil */}
+      <mesh position={[0, 0.22, 0]}><boxGeometry args={[1.1, 0.1, 0.6]} /><meshStandardMaterial color="#3A2310" roughness={1} /></mesh>
+      {/* Plants */}
+      {[[-0.35, 'red'], [0, 'yellow'], [0.35, 'pink']].map(([x, type], i) => (
+        <group key={i}>
+          <mesh position={[x, 0.45, 0]}><cylinderGeometry args={[0.02, 0.025, 0.4, 6]} /><meshStandardMaterial color="#166534" roughness={0.7} /></mesh>
+          <mesh position={[x, 0.7, 0]}><sphereGeometry args={[0.12, 10, 10]} /><meshStandardMaterial color={['#ef4444', '#eab308', '#ec4899'][i]} roughness={0.5} /></mesh>
+          {[0, 120, 240].map((deg, j) => {
+            const r = (deg * Math.PI) / 180;
+            return (<mesh key={j} position={[x + Math.sin(r) * 0.1, 0.55, Math.cos(r) * 0.1]} rotation={[0.4, r, 0]}>
+              <sphereGeometry args={[0.07, 8, 6]} /><meshStandardMaterial color="#4ade80" roughness={0.6} />
+            </mesh>);
+          })}
+        </group>
+      ))}
+      {/* Legs */}
+      {[[-0.5, -0.25], [0.5, -0.25], [-0.5, 0.25], [0.5, 0.25]].map(([x, z], i) => (
+        <mesh key={`lg${i}`} position={[x, -0.4, z]}><cylinderGeometry args={[0.04, 0.04, 0.35, 8]} /><meshStandardMaterial color="#713f12" roughness={0.7} /></mesh>
+      ))}
+    </group>
+  );
+}
+
+// ──────────────────────────────────────────────────────
+//  TOY idea t2 → Donation Box
+// ──────────────────────────────────────────────────────
+export function DonateBoxModel() {
+  const g = useRef();
+  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = clock.elapsedTime * 0.3; });
+  return (
+    <group ref={g} position={[0, -0.3, 0]}>
+      {/* Box */}
+      <mesh position={[0, 0.35, 0]}><boxGeometry args={[1.1, 0.8, 0.8]} /><meshStandardMaterial color="#7c3aed" roughness={0.5} /></mesh>
+      {/* Box flaps */}
+      <mesh position={[-0.28, 0.8, 0]} rotation={[0, 0, -0.3]}><boxGeometry args={[0.55, 0.06, 0.78]} /><meshStandardMaterial color="#6d28d9" roughness={0.5} /></mesh>
+      <mesh position={[0.28, 0.8, 0]} rotation={[0, 0, 0.3]}><boxGeometry args={[0.55, 0.06, 0.78]} /><meshStandardMaterial color="#6d28d9" roughness={0.5} /></mesh>
+      {/* Heart symbol */}
+      <mesh position={[0, 0.35, 0.41]}><sphereGeometry args={[0.15, 10, 10]} /><meshStandardMaterial color="#f472b6" roughness={0.4} /></mesh>
+      {/* Toys peeking out */}
+      <mesh position={[-0.2, 0.9, 0.1]}><sphereGeometry args={[0.12, 10, 10]} /><meshStandardMaterial color="#fbbf24" roughness={0.7} /></mesh>
+      <mesh position={[0.15, 0.95, -0.05]}><boxGeometry args={[0.1, 0.2, 0.1]} /><meshStandardMaterial color="#ef4444" roughness={0.5} /></mesh>
+      <mesh position={[0, 0.85, 0.15]}><sphereGeometry args={[0.08, 8, 8]} /><meshStandardMaterial color="#60a5fa" roughness={0.6} /></mesh>
+      {/* "DONATE" text placeholder - ribbon */}
+      <mesh position={[0, 0.15, 0.42]}><boxGeometry args={[0.8, 0.12, 0.01]} /><meshStandardMaterial color="#fbbf24" roughness={0.3} /></mesh>
+    </group>
+  );
+}
+
+// ──────────────────────────────────────────────────────
+//  APPLIANCE idea ap2 → Steampunk Art
+// ──────────────────────────────────────────────────────
+export function SteampunkArtModel() {
+  const g = useRef();
+  const gear1 = useRef();
+  const gear2 = useRef();
+  useFrame(({ clock }) => {
+    if (g.current) g.current.rotation.y = clock.elapsedTime * 0.3;
+    if (gear1.current) gear1.current.rotation.z = clock.elapsedTime * 0.8;
+    if (gear2.current) gear2.current.rotation.z = -clock.elapsedTime * 1.2;
+  });
+  return (
+    <group ref={g} position={[0, -0.2, 0]}>
+      {/* Wood base */}
+      <mesh position={[0, -0.3, 0]}><cylinderGeometry args={[0.7, 0.75, 0.12, 20]} /><meshStandardMaterial color="#92400e" roughness={0.8} /></mesh>
+      {/* Central post */}
+      <mesh position={[0, 0.2, 0]}><cylinderGeometry args={[0.06, 0.08, 0.9, 8]} /><meshStandardMaterial color="#d4a574" roughness={0.4} metalness={0.6} /></mesh>
+      {/* Large gear */}
+      <group ref={gear1} position={[-0.25, 0.3, 0.1]}>
+        <mesh><torusGeometry args={[0.25, 0.04, 6, 20]} /><meshStandardMaterial color="#f59e0b" roughness={0.2} metalness={0.8} /></mesh>
+        {[0, 60, 120, 180, 240, 300].map((deg, i) => {
+          const r = (deg * Math.PI) / 180;
+          return (<mesh key={i} position={[Math.sin(r) * 0.25, Math.cos(r) * 0.25, 0]}><boxGeometry args={[0.06, 0.06, 0.04]} /><meshStandardMaterial color="#d97706" roughness={0.2} metalness={0.8} /></mesh>);
+        })}
+      </group>
+      {/* Small gear */}
+      <group ref={gear2} position={[0.2, 0.5, 0.05]}>
+        <mesh><torusGeometry args={[0.15, 0.03, 6, 16]} /><meshStandardMaterial color="#9ca3af" roughness={0.15} metalness={0.9} /></mesh>
+      </group>
+      {/* Coils */}
+      <mesh position={[0.3, -0.05, -0.15]}><torusGeometry args={[0.12, 0.02, 6, 16]} /><meshStandardMaterial color="#b45309" roughness={0.3} metalness={0.7} /></mesh>
+      {/* Light bulb */}
+      <mesh position={[0, 0.75, 0]}><sphereGeometry args={[0.12, 12, 12]} /><meshStandardMaterial color="#fef3c7" emissive="#fbbf24" emissiveIntensity={1.5} transparent opacity={0.8} /></mesh>
+      <pointLight position={[0, 0.75, 0]} intensity={0.8} color="#fbbf24" distance={1.5} />
+    </group>
+  );
+}
+
+// ──────────────────────────────────────────────────────
+//  ELECTRONICS idea p2 → Digital Photo Frame
+// ──────────────────────────────────────────────────────
+export function DigitalFrameModel() {
+  const g = useRef();
+  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = clock.elapsedTime * 0.25; });
+  return (
+    <group ref={g} position={[0, -0.1, 0]}>
+      {/* Frame border */}
+      <mesh><boxGeometry args={[1.3, 1.0, 0.08]} /><meshStandardMaterial color="#1f2937" roughness={0.3} metalness={0.4} /></mesh>
+      {/* Screen */}
+      <mesh position={[0, 0, 0.041]}><boxGeometry args={[1.1, 0.8, 0.01]} /><meshStandardMaterial color="#bfdbfe" emissive="#93c5fd" emissiveIntensity={0.3} roughness={0.1} /></mesh>
+      {/* Photo placeholder - landscape */}
+      <mesh position={[-0.15, 0.05, 0.05]}><boxGeometry args={[0.5, 0.35, 0.01]} /><meshStandardMaterial color="#86efac" roughness={0.4} /></mesh>
+      {/* Sun in photo */}
+      <mesh position={[0.05, 0.2, 0.06]}><sphereGeometry args={[0.08, 8, 8]} /><meshStandardMaterial color="#fbbf24" emissive="#f59e0b" emissiveIntensity={0.5} /></mesh>
+      {/* Mountains in photo */}
+      <mesh position={[-0.2, -0.05, 0.06]} rotation={[0, 0, 0]}><coneGeometry args={[0.15, 0.2, 4]} /><meshStandardMaterial color="#166534" roughness={0.6} /></mesh>
+      {/* Stand */}
+      <mesh position={[0, -0.55, -0.15]} rotation={[0.3, 0, 0]}><boxGeometry args={[0.4, 0.06, 0.5]} /><meshStandardMaterial color="#374151" roughness={0.4} metalness={0.3} /></mesh>
+    </group>
+  );
+}
+
+// ──────────────────────────────────────────────────────
+//  FABRIC idea f2 → Braided Rug
+// ──────────────────────────────────────────────────────
+export function BraidedRugModel() {
+  const g = useRef();
+  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = clock.elapsedTime * 0.3; });
+  const ringColors = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6'];
+  return (
+    <group ref={g} position={[0, -0.5, 0]} rotation={[Math.PI / 2.5, 0, 0]}>
+      {/* Concentric braided rings */}
+      {ringColors.map((c, i) => (
+        <mesh key={i}><torusGeometry args={[0.15 + i * 0.14, 0.06, 6, 32]} /><meshStandardMaterial color={c} roughness={0.9} /></mesh>
+      ))}
+    </group>
+  );
+}

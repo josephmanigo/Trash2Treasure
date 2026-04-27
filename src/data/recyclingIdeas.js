@@ -168,6 +168,24 @@ export const recyclingIdeas = {
           "Donate or drop off — components will be responsibly recycled",
           "Get a recycling certificate for your efforts!"
         ]
+      },
+      {
+        id: "p2",
+        title: "Digital Photo Frame",
+        difficulty: "Medium",
+        time: "45 mins",
+        impact: "Medium",
+        emoji: "🖼️",
+        description: "Turn an old phone or tablet into a beautiful digital photo frame for your desk.",
+        materials: ["Old phone/tablet", "Photo frame or cardboard", "USB charger", "Photo slideshow app"],
+        steps: [
+          "Install a free photo slideshow app on the device",
+          "Load your favorite photos into the app",
+          "Build or buy a simple stand/frame that fits the device",
+          "Set the slideshow to auto-rotate through photos",
+          "Keep it plugged in on your nightstand or desk",
+          "Enjoy a rotating gallery of memories!"
+        ]
       }
     ]
   },
@@ -192,6 +210,25 @@ export const recyclingIdeas = {
           "Cut fringe strips along the bottom (about 8cm up, 2cm wide)",
           "Tie each pair of front and back fringe strips together tightly",
           "Turn right-side out — your tote bag is ready!"
+        ]
+      },
+      {
+        id: "f2",
+        title: "Braided Rug",
+        difficulty: "Medium",
+        time: "2-3 hours",
+        impact: "High",
+        emoji: "🧶",
+        description: "Braid old t-shirts and fabric scraps into a colorful, cozy floor rug.",
+        materials: ["Old t-shirts (5-8)", "Scissors", "Needle and thread"],
+        steps: [
+          "Cut t-shirts into 2-inch wide strips",
+          "Stretch each strip to make it curl into a tube",
+          "Tie three strips together at one end",
+          "Braid the strips tightly",
+          "Coil the braid into a spiral, stitching as you go",
+          "Keep adding strips and braiding until desired size",
+          "Secure the end by tucking and stitching underneath"
         ]
       }
     ]
@@ -239,6 +276,235 @@ export const recyclingIdeas = {
       }
     ]
   },
+
+  /* ═══════════════════ NEW CATEGORIES ═══════════════════ */
+
+  glass: {
+    label: "Glass / Ceramic",
+    emoji: "🏺",
+    color: "#06b6d4",
+    ideas: [
+      {
+        id: "g1",
+        title: "Mini Terrarium",
+        difficulty: "Medium",
+        time: "40 mins",
+        impact: "High",
+        emoji: "🌿",
+        description: "Create a stunning self-sustaining mini ecosystem inside a glass jar or vase.",
+        materials: ["Glass jar or vase", "Small pebbles", "Activated charcoal", "Potting soil", "Small plants (ferns, moss)", "Decorative stones"],
+        steps: [
+          "Clean the glass container thoroughly",
+          "Add a 1-inch layer of small pebbles for drainage",
+          "Add a thin layer of activated charcoal to prevent mold",
+          "Add 2-3 inches of potting soil",
+          "Plant small ferns, moss, or succulents",
+          "Add decorative stones and miniature figurines",
+          "Mist lightly and place in indirect sunlight"
+        ]
+      },
+      {
+        id: "g2",
+        title: "Painted Decorative Vase",
+        difficulty: "Easy",
+        time: "30 mins",
+        impact: "Medium",
+        emoji: "🎨",
+        description: "Transform plain glass into a stunning hand-painted decorative vase.",
+        materials: ["Glass jar/vase", "Acrylic paint", "Paint brushes", "Painter's tape", "Clear sealant"],
+        steps: [
+          "Clean glass and let dry completely",
+          "Apply painter's tape for geometric patterns",
+          "Paint with acrylic paint in your desired colors",
+          "Let dry between coats for best coverage",
+          "Remove tape carefully for clean lines",
+          "Seal with clear spray sealant",
+          "Fill with dried flowers or fairy lights!"
+        ]
+      }
+    ]
+  },
+  organic: {
+    label: "Food / Organic Waste",
+    emoji: "🍎",
+    color: "#84cc16",
+    ideas: [
+      {
+        id: "o1",
+        title: "Compost Bin",
+        difficulty: "Easy",
+        time: "Ongoing",
+        impact: "High",
+        emoji: "🌍",
+        description: "Turn food scraps into rich garden fertilizer with a simple composting system.",
+        materials: ["Organic waste", "Compost bin or container", "Brown materials (leaves, cardboard)", "Water"],
+        steps: [
+          "Choose a shady spot for your compost bin",
+          "Start with a layer of brown materials (dry leaves, cardboard)",
+          "Add green materials (food scraps, coffee grounds)",
+          "Alternate brown and green layers",
+          "Keep moist but not waterlogged",
+          "Turn the pile weekly to aerate",
+          "In 2-3 months, harvest rich compost for your garden"
+        ]
+      },
+      {
+        id: "o2",
+        title: "Seed Bombs",
+        difficulty: "Easy",
+        time: "20 mins",
+        impact: "High",
+        emoji: "💣",
+        description: "Mix compost with clay and wildflower seeds to create guerrilla gardening seed bombs.",
+        materials: ["Compost", "Clay powder or air-dry clay", "Wildflower seeds", "Water", "Bowl"],
+        steps: [
+          "Mix 5 parts clay with 3 parts compost in a bowl",
+          "Add 1 part wildflower seed mix",
+          "Slowly add water until you can form balls",
+          "Roll into walnut-sized balls",
+          "Let dry in the sun for 24-48 hours",
+          "Toss them into bare patches of earth",
+          "Wait for rain and watch wildflowers bloom!"
+        ]
+      }
+    ]
+  },
+  furniture: {
+    label: "Old Furniture",
+    emoji: "🪑",
+    color: "#d97706",
+    ideas: [
+      {
+        id: "fu1",
+        title: "Upcycled Bookshelf",
+        difficulty: "Medium",
+        time: "3-4 hours",
+        impact: "High",
+        emoji: "📚",
+        description: "Sand, repaint and transform old furniture into a beautiful bookshelf or display unit.",
+        materials: ["Old furniture piece", "Sandpaper (120 & 220 grit)", "Primer", "Paint or stain", "New hardware (optional)"],
+        steps: [
+          "Remove any hardware (knobs, handles)",
+          "Sand the entire surface with 120-grit sandpaper",
+          "Wipe clean with a damp cloth",
+          "Apply primer and let dry completely",
+          "Apply 2 coats of paint or stain",
+          "Install new hardware for a fresh look",
+          "Add shelf liners or decorative paper inside"
+        ]
+      },
+      {
+        id: "fu2",
+        title: "Garden Planter Box",
+        difficulty: "Medium",
+        time: "2 hours",
+        impact: "High",
+        emoji: "🌻",
+        description: "Convert old drawers or furniture pieces into charming garden planter boxes.",
+        materials: ["Old drawer or furniture piece", "Drill", "Landscape fabric", "Soil", "Plants"],
+        steps: [
+          "Remove drawer from furniture or select a suitable piece",
+          "Drill drainage holes in the bottom",
+          "Line with landscape fabric to prevent soil loss",
+          "Fill with potting soil",
+          "Plant herbs, flowers, or succulents",
+          "Place in your garden or on your porch",
+          "Water regularly and enjoy your upcycled garden!"
+        ]
+      }
+    ]
+  },
+  toy: {
+    label: "Toys / Sports",
+    emoji: "🧸",
+    color: "#ec4899",
+    ideas: [
+      {
+        id: "t1",
+        title: "Toy Repair Workshop",
+        difficulty: "Medium",
+        time: "1-2 hours",
+        impact: "High",
+        emoji: "🔧",
+        description: "Fix broken toys instead of throwing them away — give them a second life.",
+        materials: ["Broken toy", "Super glue or hot glue", "Needle and thread (for plush)", "Replacement parts if needed"],
+        steps: [
+          "Assess the damage — what's broken?",
+          "Clean the toy thoroughly",
+          "For plastic: use super glue or model cement",
+          "For plush: re-stuff and sew tears with matching thread",
+          "Replace batteries or worn parts",
+          "Add a creative touch — new paint, patches, or accessories",
+          "Your toy is ready for more adventures!"
+        ]
+      },
+      {
+        id: "t2",
+        title: "Donation Drive",
+        difficulty: "Easy",
+        time: "30 mins",
+        impact: "High",
+        emoji: "🎁",
+        description: "Organize and donate gently used toys to children who need them.",
+        materials: ["Gently used toys", "Cleaning supplies", "Box or bag", "List of local charities"],
+        steps: [
+          "Sort toys by condition — keep only gently used items",
+          "Clean and sanitize each toy",
+          "Check for missing pieces or safety hazards",
+          "Pack in a clean box or bag",
+          "Find local charities, shelters, or toy drives",
+          "Drop off your donation",
+          "Inspire others to donate too!"
+        ]
+      }
+    ]
+  },
+  appliance: {
+    label: "Home Appliance",
+    emoji: "🔌",
+    color: "#6366f1",
+    ideas: [
+      {
+        id: "ap1",
+        title: "Certified E-Waste Recycling",
+        difficulty: "Easy",
+        time: "30 mins",
+        impact: "High",
+        emoji: "♻️",
+        description: "Take old appliances to certified e-waste recyclers to recover valuable materials safely.",
+        materials: ["Old appliance", "Vehicle for transport"],
+        steps: [
+          "Unplug and clean the appliance",
+          "Remove any personal items stored inside",
+          "Check if the manufacturer offers a take-back program",
+          "Find your nearest certified e-waste recycling center",
+          "Some retailers also accept old appliances for recycling",
+          "Transport safely and drop off",
+          "Ask for a recycling receipt for your records"
+        ]
+      },
+      {
+        id: "ap2",
+        title: "Steampunk Art Piece",
+        difficulty: "Hard",
+        time: "4-6 hours",
+        impact: "Medium",
+        emoji: "⚙️",
+        description: "Carefully disassemble old appliances and create stunning steampunk-style art or sculptures.",
+        materials: ["Old appliance", "Screwdriver set", "Pliers", "Strong adhesive", "Wood base", "Spray paint (metallic)"],
+        steps: [
+          "SAFETY FIRST: Ensure the appliance is unplugged and discharged",
+          "Carefully disassemble using appropriate tools",
+          "Sort interesting parts: gears, coils, circuit boards, fans",
+          "Clean all parts thoroughly",
+          "Arrange parts into an artistic composition on a wood base",
+          "Secure with strong adhesive or screws",
+          "Apply metallic spray paint for a steampunk finish"
+        ]
+      }
+    ]
+  },
+
   default: {
     label: "Waste Item",
     emoji: "♻️",
@@ -286,25 +552,82 @@ export const recyclingIdeas = {
 
 export const getIdeasForObject = (detectedClass) => {
   const mapping = {
+    // Bottles / Glass containers
     'bottle': 'bottle',
-    'wine glass': 'bottle',
+    'wine glass': 'glass',
+
+    // Cups / Bowls
     'cup': 'cup',
     'bowl': 'cup',
+
+    // Paper / Books
     'book': 'book',
+
+    // Electronics / Gadgets
     'cell phone': 'cell_phone',
     'laptop': 'cell_phone',
     'keyboard': 'cell_phone',
     'mouse': 'cell_phone',
     'remote': 'cell_phone',
     'tv': 'cell_phone',
+    'clock': 'cell_phone',
+    'hair drier': 'cell_phone',
+
+    // Metal / Tools
     'scissors': 'scissors',
     'knife': 'scissors',
     'fork': 'scissors',
     'spoon': 'scissors',
+    'toothbrush': 'scissors',
+
+    // Fabric / Clothing
     'person': 'person',
     'backpack': 'person',
     'handbag': 'person',
     'suitcase': 'person',
+    'umbrella': 'person',
+    'tie': 'person',
+
+    // Glass / Ceramic
+    'vase': 'glass',
+
+    // Organic / Food waste
+    'banana': 'organic',
+    'apple': 'organic',
+    'orange': 'organic',
+    'broccoli': 'organic',
+    'carrot': 'organic',
+    'sandwich': 'organic',
+    'hot dog': 'organic',
+    'pizza': 'organic',
+    'donut': 'organic',
+    'cake': 'organic',
+    'potted plant': 'organic',
+
+    // Furniture / Wood
+    'chair': 'furniture',
+    'couch': 'furniture',
+    'bed': 'furniture',
+    'dining table': 'furniture',
+    'bench': 'furniture',
+
+    // Toys / Sports items
+    'teddy bear': 'toy',
+    'frisbee': 'toy',
+    'sports ball': 'toy',
+    'kite': 'toy',
+    'baseball bat': 'toy',
+    'baseball glove': 'toy',
+    'skateboard': 'toy',
+    'surfboard': 'toy',
+    'tennis racket': 'toy',
+
+    // Home Appliances
+    'microwave': 'appliance',
+    'oven': 'appliance',
+    'toaster': 'appliance',
+    'refrigerator': 'appliance',
+    'sink': 'appliance',
   };
 
   const key = detectedClass?.toLowerCase();
@@ -319,4 +642,9 @@ export const objectLabels = {
   cell_phone: { label: "Electronics", emoji: "📱" },
   scissors: { label: "Metal Item", emoji: "🥫" },
   person: { label: "Fabric/Clothing", emoji: "👕" },
+  glass: { label: "Glass/Ceramic", emoji: "🏺" },
+  organic: { label: "Food/Organic", emoji: "🍎" },
+  furniture: { label: "Furniture", emoji: "🪑" },
+  toy: { label: "Toys/Sports", emoji: "🧸" },
+  appliance: { label: "Appliance", emoji: "🔌" },
 };

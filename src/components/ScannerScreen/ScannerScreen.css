@@ -223,6 +223,43 @@
   border-radius: var(--radius-full);
 }
 
+/* ── 3D Preview (no card background) ── */
+.scan-3d-preview {
+  position: absolute;
+  right: 16px;
+  bottom: 160px;
+  width: 170px;
+  height: 210px;
+  z-index: 25;
+  pointer-events: none;
+}
+
+.scan-3d-label {
+  padding: 4px 0 0;
+  text-align: center;
+}
+
+.scan-3d-tag {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+}
+
+.scan-3d-title {
+  display: block;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+
 /* ── Bottom Controls ── */
 .scanner-bottom {
   position: absolute;
@@ -337,7 +374,6 @@
   width: 36px; height: 36px;
   border-radius: 12px;
   background: var(--color-surface);
-  color: var(--g600);
   box-shadow: var(--shadow-sm);
   flex-shrink: 0;
 }
