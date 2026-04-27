@@ -267,6 +267,6 @@ app.use((req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Trash2Treasure API running on port ${PORT}`);
 });
