@@ -226,10 +226,12 @@
 /* ── 3D Preview (no card background) ── */
 .scan-3d-preview {
   position: absolute;
-  right: 16px;
-  bottom: 160px;
-  width: 170px;
-  height: 210px;
+  top: 50%;
+  left: 50%;
+  margin-top: -150px;
+  margin-left: -150px;
+  width: 300px;
+  height: 300px;
   z-index: 25;
   pointer-events: none;
 }

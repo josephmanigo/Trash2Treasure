@@ -8,6 +8,7 @@ import '@tensorflow/tfjs';
 import { ArrowLeft, Zap, ZapOff, RefreshCw, Camera, Layers, Search, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug } from 'lucide-react';
 import { getIdeasForObject } from '../../data/recyclingIdeas';
 import { MODEL_MAP } from '../ARScreen/ideaModelMap';
+import { TransformationWrapper } from '../ARScreen/ARScreen';
 import './ScannerScreen.css';
 
 const RECYCLABLE = [
@@ -57,15 +58,21 @@ const getClassIcon = (cls) => {
 };
 
 /* ── Mini 3D Preview Scene ── */
-function PreviewScene({ modelClass }) {
+function PreviewScene({ modelClass, onPhaseChange, webcamRef, bbox }) {
   const ModelComponent = MODEL_MAP[modelClass] || MODEL_MAP.default;
   return (
     <>
       <ambientLight intensity={0.7} />
       <directionalLight position={[3, 5, 3]} intensity={1.2} />
-      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={6} />
+      <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
       <Environment preset="city" />
-      <ModelComponent />
+      <TransformationWrapper 
+        ModelComponent={ModelComponent} 
+        detectedClass={modelClass} 
+        onPhaseChange={onPhaseChange} 
+        webcamRef={webcamRef}
+        bbox={bbox}
+      />
     </>
   );
 }
@@ -84,6 +91,7 @@ const ScannerScreen = ({ onBack, onDetect }) => {
   const [showDemoPanel,  setShowDemoPanel]  = useState(false);
   const [highlightItem,  setHighlightItem]  = useState(null);
   const [cameraError,    setCameraError]    = useState(false);
+  const [previewPhase,   setPreviewPhase]   = useState('Recognized Object');
 
   useEffect(() => {
     let mounted = true;
@@ -273,9 +281,10 @@ const ScannerScreen = ({ onBack, onDetect }) => {
       </div>
 
       {/* ── 3D Preview Panel (shows while scanning detects an item) ── */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {topDetection && !scanning && (
           <motion.div
+            key={topDetection.class} // Re-mount if detection changes to restart animation
             className="scan-3d-preview"
             initial={{ opacity: 0, scale: 0.7, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -285,12 +294,17 @@ const ScannerScreen = ({ onBack, onDetect }) => {
             <Canvas
               camera={{ position: [0, 0.8, 2.8], fov: 52 }}
               gl={{ antialias: true, alpha: true }}
-              style={{ background: 'transparent', width: '100%', height: '280px' }}
+              style={{ background: 'transparent', width: '100%', height: '100%' }}
             >
-              <PreviewScene modelClass={topDetection.class.toLowerCase()} />
+              <PreviewScene 
+                modelClass={topDetection.class.toLowerCase()} 
+                onPhaseChange={setPreviewPhase} 
+                webcamRef={webcamRef}
+                bbox={topDetection.bbox}
+              />
             </Canvas>
-            <div className="scan-3d-label">
-              <span className="scan-3d-tag">Could become</span>
+            <div className="scan-3d-label" style={{ marginTop: '-20px' }}>
+              <span className="scan-3d-tag">{previewPhase}</span>
               <strong className="scan-3d-title">{getFirstIdeaTitle(topDetection.class)}</strong>
             </div>
           </motion.div>
