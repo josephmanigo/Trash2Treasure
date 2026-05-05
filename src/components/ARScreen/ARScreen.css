@@ -275,3 +275,57 @@
     padding-right: 18px;
   }
 }
+
+@media (min-width: 900px) {
+  .ar-canvas-wrapper {
+    right: min(38vw, 520px);
+  }
+
+  .ar-top-bar {
+    top: 32px;
+    left: clamp(32px, 4vw, 64px);
+    right: clamp(32px, 4vw, 64px);
+  }
+
+  .ar-phase-indicator {
+    top: 34px;
+  }
+
+  .ar-label-badge {
+    top: 104px;
+    left: clamp(32px, 4vw, 64px);
+  }
+
+  .ar-controls-hint {
+    top: 104px;
+    right: min(calc(38vw + 32px), 552px);
+  }
+
+  .ar-bottom-sheet {
+    top: 0;
+    bottom: 0;
+    left: auto;
+    width: min(38vw, 520px);
+    border-radius: 0;
+    padding: 88px clamp(28px, 3vw, 48px) 42px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow-y: auto;
+  }
+
+  .ar-sheet-handle {
+    display: none;
+  }
+
+  .ar-tabs-container {
+    margin-left: calc(clamp(28px, 3vw, 48px) * -1);
+    margin-right: calc(clamp(28px, 3vw, 48px) * -1);
+    padding-left: clamp(28px, 3vw, 48px);
+    padding-right: clamp(28px, 3vw, 48px);
+  }
+
+  .ar-idea-title {
+    font-size: clamp(26px, 2.4vw, 36px);
+  }
+}

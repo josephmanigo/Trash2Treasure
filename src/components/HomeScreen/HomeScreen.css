@@ -362,3 +362,72 @@
     padding-right: 8px;
   }
 }
+
+@media (min-width: 900px) {
+  .home-nav {
+    padding: 28px clamp(32px, 5vw, 72px) 20px;
+  }
+
+  .home-body {
+    display: grid;
+    grid-template-columns: minmax(420px, 1.35fr) minmax(320px, 0.9fr);
+    grid-template-areas:
+      "hero stats"
+      "hero actions"
+      "tip actions";
+    align-content: start;
+    gap: clamp(18px, 2vw, 28px);
+    padding: clamp(24px, 4vw, 56px) clamp(32px, 5vw, 72px) 40px;
+  }
+
+  .home-hero-card {
+    grid-area: hero;
+    min-height: min(58vh, 620px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(40px, 6vw, 72px);
+  }
+
+  .home-hero-title {
+    font-size: clamp(40px, 4.6vw, 68px);
+    max-width: 720px;
+  }
+
+  .home-hero-sub {
+    max-width: 520px;
+    font-size: 16px;
+  }
+
+  .home-stats {
+    grid-area: stats;
+    gap: 14px;
+  }
+
+  .home-stat-card {
+    min-height: 150px;
+    justify-content: center;
+  }
+
+  .home-section {
+    grid-area: actions;
+  }
+
+  .home-eco-tip {
+    grid-area: tip;
+  }
+}
+
+@media (min-width: 1200px) {
+  .home-body {
+    grid-template-columns: minmax(560px, 1.4fr) minmax(420px, 0.85fr);
+  }
+
+  .home-actions-grid {
+    gap: 14px;
+  }
+
+  .home-action-card {
+    padding: 20px;
+  }
+}

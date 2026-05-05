@@ -284,3 +284,28 @@
     overflow-wrap: anywhere;
   }
 }
+
+@media (min-width: 900px) {
+  .how-header {
+    padding: 32px clamp(32px, 5vw, 72px) 24px;
+  }
+
+  .how-content {
+    padding: clamp(32px, 5vw, 72px);
+    display: grid;
+    grid-template-columns: minmax(360px, 0.8fr) minmax(460px, 1.2fr);
+    gap: clamp(28px, 4vw, 56px);
+    align-content: start;
+  }
+
+  .how-hero,
+  .tech-note,
+  .how-cta {
+    grid-column: 1;
+  }
+
+  .how-steps {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+  }
+}

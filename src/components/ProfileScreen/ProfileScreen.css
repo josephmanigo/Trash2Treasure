@@ -422,3 +422,30 @@
     width: calc(100vw - 32px);
   }
 }
+
+@media (min-width: 900px) {
+  .profile-header {
+    padding: 32px clamp(32px, 5vw, 72px) 24px;
+  }
+
+  .profile-content {
+    padding: clamp(32px, 5vw, 72px);
+    display: grid;
+    grid-template-columns: minmax(320px, 0.72fr) minmax(420px, 1.28fr);
+    gap: clamp(24px, 4vw, 56px);
+    align-content: start;
+  }
+
+  .profile-identity {
+    min-height: 360px;
+    justify-content: center;
+  }
+
+  .profile-section {
+    grid-column: 2;
+  }
+
+  .profile-card.profile-identity {
+    grid-row: 1 / span 3;
+  }
+}

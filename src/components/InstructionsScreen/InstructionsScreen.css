@@ -470,3 +470,41 @@
     gap: 10px;
   }
 }
+
+@media (min-width: 900px) {
+  .instructions-header {
+    padding: 32px clamp(32px, 5vw, 72px) 24px;
+  }
+
+  .instructions-content {
+    padding: clamp(32px, 5vw, 72px);
+    display: grid;
+    grid-template-columns: minmax(340px, 0.8fr) minmax(460px, 1.2fr);
+    column-gap: clamp(32px, 5vw, 72px);
+    align-content: start;
+  }
+
+  .instr-description,
+  .progress-section,
+  .materials-section {
+    grid-column: 1;
+  }
+
+  .steps-section,
+  .completion-card {
+    grid-column: 2;
+  }
+
+  .steps-section {
+    grid-row: 1 / span 5;
+  }
+
+  .share-modal {
+    left: 50%;
+    right: auto;
+    bottom: 50%;
+    width: min(460px, calc(100vw - 48px));
+    transform: translate(-50%, 50%);
+    border-radius: var(--radius-xl);
+  }
+}
