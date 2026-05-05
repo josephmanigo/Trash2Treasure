@@ -433,3 +433,40 @@
   color: var(--color-text-2);
   text-align: center;
 }
+
+@media (max-width: 430px) {
+  .instructions-header,
+  .instructions-content,
+  .step-body,
+  .share-modal {
+    min-width: 0;
+  }
+
+  .instructions-header,
+  .instructions-content {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  .instr-header-actions {
+    flex-shrink: 0;
+  }
+
+  .step-text,
+  .material-chip,
+  .share-option-name {
+    overflow-wrap: anywhere;
+  }
+
+  .share-modal {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 20px));
+  }
+}
+
+@media (max-width: 360px) {
+  .share-grid {
+    gap: 10px;
+  }
+}

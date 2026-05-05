@@ -233,3 +233,35 @@
   background: var(--g50);
   color: var(--g800);
 }
+
+@media (max-width: 430px) {
+  .saved-header,
+  .saved-content,
+  .saved-card,
+  .saved-card-info {
+    min-width: 0;
+  }
+
+  .saved-header,
+  .saved-content {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  .saved-card-title,
+  .saved-card-desc,
+  .saved-card-time {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 360px) {
+  .saved-card {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .saved-card-body {
+    gap: 12px;
+  }
+}

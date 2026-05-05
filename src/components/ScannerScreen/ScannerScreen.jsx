@@ -57,6 +57,42 @@ const getClassIcon = (cls) => {
 };
 
 /* ── Mini 3D Preview Scene ── */
+const getMaskShape = (cls) => {
+  const value = cls?.toLowerCase() || '';
+  if (['bottle', 'wine glass', 'vase'].includes(value)) return 'bottle';
+  if (['cup', 'bowl'].includes(value)) return 'cup';
+  if (['book', 'laptop', 'keyboard', 'remote', 'tv'].includes(value)) return 'box';
+  if (['cell phone', 'mouse', 'clock'].includes(value)) return 'phone';
+  if (['scissors', 'knife', 'fork', 'spoon', 'toothbrush'].includes(value)) return 'can';
+  return 'default';
+};
+
+function WireframeMask({ shape }) {
+  const path = {
+    bottle: 'M38 8 H62 V20 C62 25 67 29 68 38 L73 82 C74 90 68 96 60 96 H40 C32 96 26 90 27 82 L32 38 C33 29 38 25 38 20 Z',
+    cup: 'M25 18 H75 L68 92 H32 Z',
+    box: 'M20 22 H80 V82 H20 Z',
+    phone: 'M35 10 H65 C70 10 73 14 73 19 V86 C73 92 69 96 63 96 H37 C31 96 27 92 27 86 V19 C27 14 30 10 35 10 Z',
+    can: 'M30 16 C30 10 70 10 70 16 V86 C70 94 30 94 30 86 Z',
+    default: 'M22 28 C30 12 66 8 78 29 C91 53 75 90 51 94 C27 98 8 66 22 28 Z',
+  }[shape] || 'M22 28 C30 12 66 8 78 29 C91 53 75 90 51 94 C27 98 8 66 22 28 Z';
+
+  return (
+    <svg className="object-mask-wireframe" viewBox="0 0 100 100" aria-hidden="true">
+      <path className="wireframe-shadow" d={path} />
+      <path className="wireframe-outline" d={path} />
+      {[18, 28, 38, 48, 58, 68, 78, 88].map(y => (
+        <path key={`h-${y}`} className="wireframe-line" d={`M18 ${y} H82`} />
+      ))}
+      {[24, 34, 44, 54, 64, 74].map(x => (
+        <path key={`v-${x}`} className="wireframe-line wireframe-line--soft" d={`M${x} 12 C${x - 6} 34 ${x - 6} 68 ${x} 94`} />
+      ))}
+      <path className="wireframe-line wireframe-line--soft" d="M18 50 C36 42 62 58 82 47" />
+      <path className="wireframe-line wireframe-line--soft" d="M20 66 C39 75 60 56 80 70" />
+    </svg>
+  );
+}
+
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 function RecommendationScene({ ModelComponent }) {
@@ -272,7 +308,7 @@ const ScannerScreen = ({ onBack, onDetect }) => {
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className={`object-mask ${objectBox ? '' : 'object-mask--fallback'}`}
+              className={`object-mask object-mask--${getMaskShape(topDetection.class)} ${objectBox ? '' : 'object-mask--fallback'}`}
               style={objectBox ? {
                 left: objectBox.left,
                 top: objectBox.top,
@@ -282,13 +318,14 @@ const ScannerScreen = ({ onBack, onDetect }) => {
               layout
             >
               <div className="object-mask-fill" />
+              <WireframeMask shape={getMaskShape(topDetection.class)} />
               <span className="object-mask-chip">Masked scan</span>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {cameraError && (
+      {cameraError && !topDetection && (
         <div className="camera-error-bg">
           <Camera size={32} className="camera-error-icon" />
           <p className="camera-error-text">Camera unavailable</p>

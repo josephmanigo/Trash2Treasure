@@ -31,13 +31,46 @@
 
 .object-mask {
   position: absolute;
-  border: 2px solid rgba(134, 239, 172, 0.95);
+  border: 3px solid rgba(134, 239, 172, 0.98);
   border-radius: 22px;
   box-shadow:
-    0 0 0 999px rgba(0, 0, 0, 0.26),
-    0 0 28px rgba(74, 222, 128, 0.38),
-    inset 0 0 28px rgba(74, 222, 128, 0.16);
+    0 0 0 999px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(74, 222, 128, 0.55),
+    inset 0 0 36px rgba(74, 222, 128, 0.22);
   overflow: hidden;
+}
+
+.object-mask::before,
+.object-mask::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.object-mask::before {
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, rgba(134, 239, 172, 0.9) 0 24%, transparent 24% 76%, rgba(134, 239, 172, 0.9) 76% 100%) top left / 100% 4px no-repeat,
+    linear-gradient(90deg, rgba(134, 239, 172, 0.9) 0 24%, transparent 24% 76%, rgba(134, 239, 172, 0.9) 76% 100%) bottom left / 100% 4px no-repeat,
+    linear-gradient(0deg, rgba(134, 239, 172, 0.9) 0 24%, transparent 24% 76%, rgba(134, 239, 172, 0.9) 76% 100%) top left / 4px 100% no-repeat,
+    linear-gradient(0deg, rgba(134, 239, 172, 0.9) 0 24%, transparent 24% 76%, rgba(134, 239, 172, 0.9) 76% 100%) top right / 4px 100% no-repeat;
+  filter: drop-shadow(0 0 10px rgba(82, 183, 136, 0.85));
+  z-index: 3;
+}
+
+.object-mask::after {
+  background:
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(134, 239, 172, 0.18) 45%,
+      rgba(134, 239, 172, 0.5) 50%,
+      rgba(134, 239, 172, 0.18) 55%,
+      transparent 100%
+    );
+  animation: mask-sweep 2.8s ease-in-out infinite;
+  z-index: 2;
 }
 
 .object-mask--fallback {
@@ -51,13 +84,49 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(135deg, rgba(134, 239, 172, 0.18), rgba(56, 189, 248, 0.12)),
+    radial-gradient(circle at 60% 35%, rgba(134, 239, 172, 0.24), transparent 42%),
+    linear-gradient(135deg, rgba(134, 239, 172, 0.2), rgba(56, 189, 248, 0.12)),
     repeating-linear-gradient(
       -45deg,
-      rgba(255, 255, 255, 0.14) 0 2px,
-      transparent 2px 11px
+      rgba(167, 243, 208, 0.22) 0 2px,
+      transparent 2px 12px
     );
   backdrop-filter: saturate(1.25) contrast(1.08);
+  z-index: 1;
+}
+
+.object-mask-wireframe {
+  position: absolute;
+  inset: 7%;
+  width: 86%;
+  height: 86%;
+  z-index: 2;
+  filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.85));
+  opacity: 0.9;
+}
+
+.wireframe-shadow {
+  fill: rgba(5, 150, 105, 0.1);
+  stroke: rgba(110, 231, 183, 0.28);
+  stroke-width: 6;
+}
+
+.wireframe-outline {
+  fill: none;
+  stroke: rgba(52, 255, 86, 0.95);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.wireframe-line {
+  fill: none;
+  stroke: rgba(52, 255, 86, 0.78);
+  stroke-width: 0.7;
+  vector-effect: non-scaling-stroke;
+}
+
+.wireframe-line--soft {
+  stroke: rgba(94, 234, 212, 0.62);
 }
 
 .object-mask-chip {
@@ -74,6 +143,7 @@
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
+  z-index: 4;
 }
 
 .camera-error-bg {
@@ -549,4 +619,142 @@
   inset: 0;
   border-radius: inherit;
   border: 2px solid var(--g400);
+}
+
+@keyframes mask-sweep {
+  0% { transform: translateY(-110%); opacity: 0; }
+  18% { opacity: 1; }
+  82% { opacity: 1; }
+  100% { transform: translateY(110%); opacity: 0; }
+}
+
+@media (max-width: 430px) {
+  .scanner-top-bar {
+    top: max(24px, calc(env(safe-area-inset-top) + 14px));
+    left: 14px;
+    right: 14px;
+  }
+
+  .scan-frame-wrapper {
+    top: 46%;
+    gap: 14px;
+  }
+
+  .scan-frame {
+    width: min(68vw, 250px);
+    height: min(68vw, 250px);
+  }
+
+  .object-mask--fallback {
+    left: 6vw;
+    top: 25%;
+    width: 88vw;
+    height: min(46vh, 340px);
+  }
+
+  .object-mask-chip {
+    top: 8px;
+    left: 8px;
+  }
+
+  .scan-recommendations {
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    bottom: max(116px, calc(env(safe-area-inset-bottom) + 112px));
+    max-height: 32vh;
+    overflow: hidden;
+  }
+
+  .scan-recommendation-list {
+    max-width: 100%;
+  }
+
+  .scan-3d-preview {
+    right: 8px;
+    width: min(38vw, 156px);
+    height: min(42vw, 180px);
+  }
+
+  .scan-3d-preview--fallback {
+    top: 26%;
+    right: 8px;
+  }
+
+  .scanner-bottom {
+    bottom: max(22px, calc(env(safe-area-inset-bottom) + 18px));
+  }
+
+  .demo-panel {
+    padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 20px));
+  }
+}
+
+@media (max-width: 360px) {
+  .scanner-top-bar {
+    left: 10px;
+    right: 10px;
+  }
+
+  .scanner-title-area {
+    padding: 0 6px;
+  }
+
+  .scan-recommendations {
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .scan-recommendation-btn {
+    min-width: 126px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .demo-panel {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .demo-grid {
+    gap: 8px;
+  }
+}
+
+@media (max-height: 700px) {
+  .scanner-top-bar {
+    top: max(18px, calc(env(safe-area-inset-top) + 10px));
+  }
+
+  .scan-frame-wrapper {
+    top: 42%;
+    gap: 10px;
+  }
+
+  .scan-frame {
+    width: min(60vw, 220px);
+    height: min(60vw, 220px);
+  }
+
+  .object-mask--fallback {
+    top: 21%;
+    height: min(42vh, 290px);
+  }
+
+  .scan-recommendations {
+    bottom: max(104px, calc(env(safe-area-inset-bottom) + 96px));
+  }
+
+  .scanner-bottom {
+    bottom: max(14px, calc(env(safe-area-inset-bottom) + 12px));
+  }
+
+  .capture-btn {
+    width: 76px;
+    height: 76px;
+  }
+
+  .capture-btn-inner {
+    width: 58px;
+    height: 58px;
+  }
 }

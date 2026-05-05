@@ -394,3 +394,31 @@
 .profile-confirm-btn.confirm:hover {
   background: #b91c1c;
 }
+
+@media (max-width: 430px) {
+  .profile-header,
+  .profile-content,
+  .profile-card,
+  .profile-menu-info,
+  .profile-name-section,
+  .profile-name-edit {
+    min-width: 0;
+  }
+
+  .profile-header,
+  .profile-content {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  .profile-name,
+  .profile-email,
+  .profile-menu-name,
+  .profile-menu-sub {
+    overflow-wrap: anywhere;
+  }
+
+  .profile-confirm-modal {
+    width: calc(100vw - 32px);
+  }
+}

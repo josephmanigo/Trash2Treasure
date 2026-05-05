@@ -362,4 +362,20 @@
   color: var(--g700);
 }
 
+@media (max-width: 430px) {
+  .login-screen,
+  .login-card,
+  .login-form,
+  .login-field {
+    min-width: 0;
+  }
 
+  .login-card {
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+  }
+
+  .login-input {
+    min-width: 0;
+  }
+}

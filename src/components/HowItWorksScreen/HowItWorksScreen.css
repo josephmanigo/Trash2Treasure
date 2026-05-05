@@ -262,3 +262,25 @@
 .how-cta {
   width: 100%;
 }
+
+@media (max-width: 430px) {
+  .how-screen,
+  .how-content,
+  .how-hero,
+  .how-step-card,
+  .how-step-body,
+  .tech-note {
+    min-width: 0;
+  }
+
+  .how-header,
+  .how-content {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  .how-step-desc,
+  .tech-tag {
+    overflow-wrap: anywhere;
+  }
+}

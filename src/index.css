@@ -293,3 +293,24 @@ h1, h2, h3, h4 {
   opacity: 0.08;
   animation: float 6s ease-in-out infinite;
 }
+
+@media (max-width: 430px) {
+  html, body, #root {
+    min-width: 0;
+  }
+
+  .screen-wrapper,
+  .scroll-area {
+    min-width: 0;
+  }
+
+  .btn {
+    max-width: 100%;
+  }
+
+  .toast {
+    max-width: calc(100vw - 32px);
+    white-space: normal;
+    text-align: center;
+  }
+}
