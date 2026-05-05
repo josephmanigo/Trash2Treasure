@@ -18,7 +18,7 @@
 .scanner-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(10, 31, 20, 0.4);
+  background: rgba(10, 31, 20, 0.18);
   pointer-events: none;
 }
 
@@ -31,10 +31,9 @@
 
 .object-mask {
   position: absolute;
-  border: 3px solid rgba(134, 239, 172, 0.98);
+  border: 2px solid rgba(134, 239, 172, 0.98);
   border-radius: 22px;
   box-shadow:
-    0 0 0 999px rgba(0, 0, 0, 0.3),
     0 0 30px rgba(74, 222, 128, 0.55),
     inset 0 0 36px rgba(74, 222, 128, 0.22);
   overflow: hidden;
@@ -51,10 +50,10 @@
 .object-mask::before {
   border-radius: inherit;
   background:
-    linear-gradient(90deg, rgba(134, 239, 172, 0.9) 0 24%, transparent 24% 76%, rgba(134, 239, 172, 0.9) 76% 100%) top left / 100% 4px no-repeat,
-    linear-gradient(90deg, rgba(134, 239, 172, 0.9) 0 24%, transparent 24% 76%, rgba(134, 239, 172, 0.9) 76% 100%) bottom left / 100% 4px no-repeat,
-    linear-gradient(0deg, rgba(134, 239, 172, 0.9) 0 24%, transparent 24% 76%, rgba(134, 239, 172, 0.9) 76% 100%) top left / 4px 100% no-repeat,
-    linear-gradient(0deg, rgba(134, 239, 172, 0.9) 0 24%, transparent 24% 76%, rgba(134, 239, 172, 0.9) 76% 100%) top right / 4px 100% no-repeat;
+    linear-gradient(90deg, rgba(134, 239, 172, 0.9), rgba(45, 212, 191, 0.7)) top left / 100% 2px no-repeat,
+    linear-gradient(90deg, rgba(45, 212, 191, 0.7), rgba(134, 239, 172, 0.9)) bottom left / 100% 2px no-repeat,
+    linear-gradient(0deg, rgba(134, 239, 172, 0.9), rgba(45, 212, 191, 0.7)) top left / 2px 100% no-repeat,
+    linear-gradient(0deg, rgba(45, 212, 191, 0.7), rgba(134, 239, 172, 0.9)) top right / 2px 100% no-repeat;
   filter: drop-shadow(0 0 10px rgba(82, 183, 136, 0.85));
   z-index: 3;
 }
@@ -84,15 +83,46 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 60% 35%, rgba(134, 239, 172, 0.24), transparent 42%),
-    linear-gradient(135deg, rgba(134, 239, 172, 0.2), rgba(56, 189, 248, 0.12)),
+    radial-gradient(circle at 60% 35%, rgba(134, 239, 172, 0.16), transparent 42%),
+    linear-gradient(135deg, rgba(134, 239, 172, 0.15), rgba(56, 189, 248, 0.08)),
     repeating-linear-gradient(
       -45deg,
-      rgba(167, 243, 208, 0.22) 0 2px,
-      transparent 2px 12px
+      rgba(167, 243, 208, 0.18) 0 1px,
+      transparent 1px 10px
     );
   backdrop-filter: saturate(1.25) contrast(1.08);
   z-index: 1;
+}
+
+.object-mask--bottle {
+  border-radius: 34% 34% 18% 18%;
+  clip-path: polygon(35% 0, 65% 0, 65% 18%, 74% 30%, 82% 100%, 18% 100%, 26% 30%, 35% 18%);
+}
+
+.object-mask--cup {
+  border-radius: 14% 14% 28% 28%;
+  clip-path: polygon(9% 0, 91% 0, 76% 100%, 24% 100%);
+}
+
+.object-mask--box {
+  border-radius: 8px;
+  clip-path: inset(0 round 8px);
+}
+
+.object-mask--phone {
+  border-radius: 22px;
+  clip-path: inset(0 round 22px);
+}
+
+.object-mask--can,
+.object-mask--default {
+  border-radius: 42% 42% 34% 34%;
+  clip-path: ellipse(48% 50% at 50% 50%);
+}
+
+.object-mask--chair {
+  border-radius: 16px;
+  clip-path: polygon(10% 0, 90% 0, 90% 58%, 77% 58%, 77% 100%, 60% 100%, 60% 62%, 40% 62%, 40% 100%, 23% 100%, 23% 58%, 10% 58%);
 }
 
 .object-mask-wireframe {
@@ -246,6 +276,17 @@
 }
 
 /* ── Scan Frame ── */
+.scan-guide {
+  position: absolute;
+  left: 50%;
+  bottom: 138px;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  width: min(100% - 32px, 420px);
+}
+
 .scan-frame-wrapper {
   position: absolute;
   top: 50%; left: 50%;
@@ -352,15 +393,59 @@
   position: absolute;
   top: 34%;
   right: 18px;
-  width: 168px;
-  height: 198px;
+  width: 230px;
+  height: 300px;
   z-index: 28;
-  pointer-events: none;
+  pointer-events: auto;
+  touch-action: none;
 }
 
 .scan-3d-preview--fallback {
-  top: calc(50% - 178px);
-  right: 24px;
+  top: 24%;
+  right: 14px;
+  width: min(56vw, 280px);
+  height: min(46vh, 360px);
+}
+
+.scan-3d-preview canvas {
+  position: relative;
+  z-index: 2;
+}
+
+.scan-3d-environment-shadow {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 44px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.44), rgba(0, 0, 0, 0) 68%);
+  filter: blur(4px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.scan-3d-zoom-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 4;
+  display: flex;
+  gap: 6px;
+}
+
+.scan-3d-zoom-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(0, 0, 0, 0.42);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
 }
 
 .scan-3d-label {
@@ -640,6 +725,10 @@
     gap: 14px;
   }
 
+  .scan-guide {
+    bottom: max(112px, calc(env(safe-area-inset-bottom) + 106px));
+  }
+
   .scan-frame {
     width: min(68vw, 250px);
     height: min(68vw, 250px);
@@ -671,12 +760,12 @@
 
   .scan-3d-preview {
     right: 8px;
-    width: min(38vw, 156px);
-    height: min(42vw, 180px);
+    width: min(62vw, 280px);
+    height: min(48vh, 380px);
   }
 
   .scan-3d-preview--fallback {
-    top: 26%;
+    top: 22%;
     right: 8px;
   }
 
@@ -824,9 +913,9 @@
   .scan-3d-preview {
     top: auto;
     right: clamp(40px, 6vw, 96px);
-    bottom: 126px;
-    width: min(26vw, 330px);
-    height: min(30vw, 360px);
+    bottom: 104px;
+    width: min(36vw, 480px);
+    height: min(52vh, 520px);
   }
 
   .scan-3d-preview--fallback {

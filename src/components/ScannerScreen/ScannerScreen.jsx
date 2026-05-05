@@ -1,11 +1,11 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment, Float } from '@react-three/drei';
+import { OrbitControls, Environment, Float, ContactShadows } from '@react-three/drei';
 import Webcam from 'react-webcam';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import '@tensorflow/tfjs';
-import { ArrowLeft, Zap, ZapOff, RefreshCw, Camera, Layers, Search, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug } from 'lucide-react';
+import { ArrowLeft, Zap, ZapOff, RefreshCw, Camera, Layers, Search, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug, ZoomIn, ZoomOut } from 'lucide-react';
 import { getIdeasForObject } from '../../data/recyclingIdeas';
 import { IDEA_MODEL_MAP, MODEL_MAP } from '../ARScreen/ideaModelMap';
 import './ScannerScreen.css';
@@ -64,6 +64,7 @@ const getMaskShape = (cls) => {
   if (['book', 'laptop', 'keyboard', 'remote', 'tv'].includes(value)) return 'box';
   if (['cell phone', 'mouse', 'clock'].includes(value)) return 'phone';
   if (['scissors', 'knife', 'fork', 'spoon', 'toothbrush'].includes(value)) return 'can';
+  if (['chair', 'couch', 'bed', 'dining table', 'bench'].includes(value)) return 'chair';
   return 'default';
 };
 
@@ -74,6 +75,7 @@ function WireframeMask({ shape }) {
     box: 'M20 22 H80 V82 H20 Z',
     phone: 'M35 10 H65 C70 10 73 14 73 19 V86 C73 92 69 96 63 96 H37 C31 96 27 92 27 86 V19 C27 14 30 10 35 10 Z',
     can: 'M30 16 C30 10 70 10 70 16 V86 C70 94 30 94 30 86 Z',
+    chair: 'M27 22 H73 C78 22 82 26 82 32 V58 H72 V88 H62 V58 H38 V88 H28 V58 H18 V32 C18 26 22 22 27 22 Z',
     default: 'M22 28 C30 12 66 8 78 29 C91 53 75 90 51 94 C27 98 8 66 22 28 Z',
   }[shape] || 'M22 28 C30 12 66 8 78 29 C91 53 75 90 51 94 C27 98 8 66 22 28 Z';
 
@@ -95,16 +97,27 @@ function WireframeMask({ shape }) {
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-function RecommendationScene({ ModelComponent }) {
+function RecommendationScene({ ModelComponent, modelZoom }) {
   return (
     <>
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[3, 5, 3]} intensity={1.2} />
-      <OrbitControls enableZoom={false} enablePan={false} autoRotate />
+      <ambientLight intensity={0.95} />
+      <hemisphereLight args={['#ffffff', '#254233', 0.85]} />
+      <directionalLight position={[3, 6, 4]} intensity={1.35} castShadow />
+      <OrbitControls
+        enableZoom
+        enablePan={false}
+        autoRotate={false}
+        minDistance={2.3}
+        maxDistance={7}
+        maxPolarAngle={Math.PI / 1.85}
+      />
       <Environment preset="city" />
-      <Float speed={1.6} rotationIntensity={0.18} floatIntensity={0.25}>
-        <ModelComponent />
-      </Float>
+      <group scale={modelZoom}>
+        <Float speed={1.1} rotationIntensity={0.08} floatIntensity={0.08}>
+          <ModelComponent />
+        </Float>
+      </group>
+      <ContactShadows position={[0, -1.08, 0]} opacity={0.42} scale={5.5} blur={2.6} far={4} />
     </>
   );
 }
@@ -126,6 +139,7 @@ const ScannerScreen = ({ onBack, onDetect }) => {
   const [cameraError,    setCameraError]    = useState(false);
   const [selectedIdeaChoice, setSelectedIdeaChoice] = useState(null);
   const [objectBox,      setObjectBox]      = useState(null);
+  const [modelZoom,      setModelZoom]      = useState(1.35);
 
   useEffect(() => {
     let mounted = true;
@@ -199,6 +213,12 @@ const ScannerScreen = ({ onBack, onDetect }) => {
     }
 
     const [rawX, rawY, rawW, rawH] = bbox;
+    const padX = rawW * 0.08;
+    const padY = rawH * 0.08;
+    const paddedX = rawX - padX;
+    const paddedY = rawY - padY;
+    const paddedW = rawW + padX * 2;
+    const paddedH = rawH + padY * 2;
     const scale = Math.max(
       container.width / video.videoWidth,
       container.height / video.videoHeight
@@ -207,18 +227,18 @@ const ScannerScreen = ({ onBack, onDetect }) => {
     const renderedHeight = video.videoHeight * scale;
     const offsetX = (container.width - renderedWidth) / 2;
     const offsetY = (container.height - renderedHeight) / 2;
-    const width = rawW * scale;
-    const height = rawH * scale;
-    const mappedX = rawX * scale + offsetX;
+    const width = paddedW * scale;
+    const height = paddedH * scale;
+    const mappedX = paddedX * scale + offsetX;
     const left = facingMode === 'user'
       ? container.width - (mappedX + width)
       : mappedX;
 
     setObjectBox({
       left: clamp(left, 12, Math.max(12, container.width - width - 12)),
-      top: clamp(rawY * scale + offsetY, 96, Math.max(96, container.height - height - 136)),
-      width: clamp(width, 96, container.width - 24),
-      height: clamp(height, 96, container.height - 220),
+      top: clamp(paddedY * scale + offsetY, 88, Math.max(88, container.height - height - 112)),
+      width: clamp(width, 76, container.width - 24),
+      height: clamp(height, 76, container.height - 160),
       containerWidth: container.width,
       containerHeight: container.height,
     });
@@ -239,21 +259,28 @@ const ScannerScreen = ({ onBack, onDetect }) => {
     MODEL_MAP[topDetection?.class?.toLowerCase()] ||
     MODEL_MAP.default;
 
+  useEffect(() => {
+    if (selectedIdea?.id) setModelZoom(1.35);
+  }, [selectedIdea?.id]);
+
   const modelPreviewStyle = (() => {
     if (!objectBox) return undefined;
-    const panelWidth = 168;
-    const panelHeight = 198;
+    const panelWidth = clamp(objectBox.containerWidth * 0.32, 230, 440);
+    const panelHeight = clamp(objectBox.containerHeight * 0.46, 300, 520);
     const gutter = 12;
     const placeRight = objectBox.left + objectBox.width + gutter + panelWidth < objectBox.containerWidth - 12;
+    const placeLeft = objectBox.left - gutter - panelWidth > 12;
     const left = placeRight
       ? objectBox.left + objectBox.width + gutter
-      : Math.max(12, objectBox.left - panelWidth - gutter);
+      : placeLeft
+        ? objectBox.left - panelWidth - gutter
+        : clamp(objectBox.left + objectBox.width / 2 - panelWidth / 2, 12, objectBox.containerWidth - panelWidth - 12);
     const top = clamp(
       objectBox.top + objectBox.height / 2 - panelHeight / 2,
-      112,
-      Math.max(112, objectBox.containerHeight - panelHeight - 148)
+      96,
+      Math.max(96, objectBox.containerHeight - panelHeight - 112)
     );
-    return { left, top };
+    return { left, top, width: panelWidth, height: panelHeight };
   })();
 
   const handleCapture = () => {
@@ -378,7 +405,27 @@ const ScannerScreen = ({ onBack, onDetect }) => {
         </motion.button>
       </div>
 
-      {/* ── Scan Frame ── */}
+      {/* ── Scan Guide ── */}
+      <AnimatePresence>
+        {!topDetection && (
+          <motion.div
+            className="scan-guide"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+          >
+            <p className="scan-hint">
+              {loading
+                ? 'Loading AI model...'
+                : cameraError
+                  ? 'Select an item from the demo panel below.'
+                  : 'Point the camera at a recyclable item'}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/*
       <div className="scan-frame-wrapper">
         <div className={`scan-frame ${topDetection ? 'scan-frame--active' : ''}`}>
           <span className="corner corner-tl" /><span className="corner corner-tr" />
@@ -411,6 +458,7 @@ const ScannerScreen = ({ onBack, onDetect }) => {
                 : 'Center the waste item in the frame'}
         </p>
       </div>
+      */}
 
       {/* ── 3D Preview Panel (shows while scanning detects an item) ── */}
       <AnimatePresence>
@@ -460,13 +508,33 @@ const ScannerScreen = ({ onBack, onDetect }) => {
             exit={{ opacity: 0, scale: 0.7, y: 20 }}
             transition={{ type: 'spring', damping: 20, stiffness: 260 }}
           >
+            <div className="scan-3d-environment-shadow" />
             <Canvas
-              camera={{ position: [0, 1.2, 4.2], fov: 48 }}
+              camera={{ position: [0, 1.1, 4.4], fov: 42 }}
               gl={{ antialias: true, alpha: true }}
               style={{ background: 'transparent', width: '100%', height: '100%' }}
+              shadows
             >
-              <RecommendationScene ModelComponent={SelectedModel} />
+              <RecommendationScene ModelComponent={SelectedModel} modelZoom={modelZoom} />
             </Canvas>
+            <div className="scan-3d-zoom-controls" aria-label="3D zoom controls">
+              <button
+                type="button"
+                className="scan-3d-zoom-btn"
+                onClick={() => setModelZoom(z => clamp(z + 0.18, 0.8, 2.3))}
+                aria-label="Zoom 3D model in"
+              >
+                <ZoomIn size={17} />
+              </button>
+              <button
+                type="button"
+                className="scan-3d-zoom-btn"
+                onClick={() => setModelZoom(z => clamp(z - 0.18, 0.8, 2.3))}
+                aria-label="Zoom 3D model out"
+              >
+                <ZoomOut size={17} />
+              </button>
+            </div>
             <div className="scan-3d-label">
               <span className="scan-3d-tag">3D model</span>
               <strong className="scan-3d-title">{selectedIdea.title}</strong>
