@@ -1,14 +1,13 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment } from '@react-three/drei';
+import { OrbitControls, Environment, Float } from '@react-three/drei';
 import Webcam from 'react-webcam';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import '@tensorflow/tfjs';
 import { ArrowLeft, Zap, ZapOff, RefreshCw, Camera, Layers, Search, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug } from 'lucide-react';
 import { getIdeasForObject } from '../../data/recyclingIdeas';
-import { MODEL_MAP } from '../ARScreen/ideaModelMap';
-import { TransformationWrapper } from '../ARScreen/ARScreen';
+import { IDEA_MODEL_MAP, MODEL_MAP } from '../ARScreen/ideaModelMap';
 import './ScannerScreen.css';
 
 const RECYCLABLE = [
@@ -58,26 +57,24 @@ const getClassIcon = (cls) => {
 };
 
 /* ── Mini 3D Preview Scene ── */
-function PreviewScene({ modelClass, onPhaseChange, webcamRef, bbox }) {
-  const ModelComponent = MODEL_MAP[modelClass] || MODEL_MAP.default;
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+function RecommendationScene({ ModelComponent }) {
   return (
     <>
       <ambientLight intensity={0.7} />
       <directionalLight position={[3, 5, 3]} intensity={1.2} />
-      <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
+      <OrbitControls enableZoom={false} enablePan={false} autoRotate />
       <Environment preset="city" />
-      <TransformationWrapper 
-        ModelComponent={ModelComponent} 
-        detectedClass={modelClass} 
-        onPhaseChange={onPhaseChange} 
-        webcamRef={webcamRef}
-        bbox={bbox}
-      />
+      <Float speed={1.6} rotationIntensity={0.18} floatIntensity={0.25}>
+        <ModelComponent />
+      </Float>
     </>
   );
 }
 
 const ScannerScreen = ({ onBack, onDetect }) => {
+  const scannerRef = useRef(null);
   const webcamRef  = useRef(null);
   const animFrame  = useRef(null);
 
@@ -91,7 +88,8 @@ const ScannerScreen = ({ onBack, onDetect }) => {
   const [showDemoPanel,  setShowDemoPanel]  = useState(false);
   const [highlightItem,  setHighlightItem]  = useState(null);
   const [cameraError,    setCameraError]    = useState(false);
-  const [previewPhase,   setPreviewPhase]   = useState('Recognized Object');
+  const [selectedIdeaChoice, setSelectedIdeaChoice] = useState(null);
+  const [objectBox,      setObjectBox]      = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -118,10 +116,7 @@ const ScannerScreen = ({ onBack, onDetect }) => {
   const detect = useCallback(async () => {
     if (!model || !webcamRef.current) return;
     const video = webcamRef.current.video;
-    if (!video || video.readyState !== 4) {
-      animFrame.current = requestAnimationFrame(detect);
-      return;
-    }
+    if (!video || video.readyState !== 4) return;
     try {
       const preds    = await model.detect(video);
       const relevant = preds.filter(p => RECYCLABLE.includes(p.class) && p.score > 0.35);
@@ -133,19 +128,97 @@ const ScannerScreen = ({ onBack, onDetect }) => {
         setTopDetection(null);
         setStatusMsg('Point camera at a waste item');
       }
-    } catch { }
-    animFrame.current = requestAnimationFrame(detect);
+    } catch {
+      return;
+    }
   }, [model]);
 
   useEffect(() => {
-    if (!loading && model) animFrame.current = requestAnimationFrame(detect);
-    return () => { if (animFrame.current) cancelAnimationFrame(animFrame.current); };
-  }, [detect, loading, model]);
+    if (loading || !model || scanning) return undefined;
 
-  const getFirstIdeaTitle = (cls) => {
-    const ideas = getIdeasForObject(cls);
-    return ideas?.ideas?.[0]?.title || 'Upcycled Creation';
-  };
+    let active = true;
+    const runDetection = async () => {
+      await detect();
+      if (active) animFrame.current = requestAnimationFrame(runDetection);
+    };
+
+    animFrame.current = requestAnimationFrame(runDetection);
+    return () => {
+      active = false;
+      if (animFrame.current) cancelAnimationFrame(animFrame.current);
+    };
+  }, [detect, loading, model, scanning]);
+
+  const updateObjectBox = useCallback(() => {
+    const shell = scannerRef.current;
+    const video = webcamRef.current?.video;
+    const bbox = topDetection?.bbox;
+
+    if (!shell) return;
+
+    const container = shell.getBoundingClientRect();
+    if (!bbox || !video?.videoWidth || !video?.videoHeight) {
+      setObjectBox(null);
+      return;
+    }
+
+    const [rawX, rawY, rawW, rawH] = bbox;
+    const scale = Math.max(
+      container.width / video.videoWidth,
+      container.height / video.videoHeight
+    );
+    const renderedWidth = video.videoWidth * scale;
+    const renderedHeight = video.videoHeight * scale;
+    const offsetX = (container.width - renderedWidth) / 2;
+    const offsetY = (container.height - renderedHeight) / 2;
+    const width = rawW * scale;
+    const height = rawH * scale;
+    const mappedX = rawX * scale + offsetX;
+    const left = facingMode === 'user'
+      ? container.width - (mappedX + width)
+      : mappedX;
+
+    setObjectBox({
+      left: clamp(left, 12, Math.max(12, container.width - width - 12)),
+      top: clamp(rawY * scale + offsetY, 96, Math.max(96, container.height - height - 136)),
+      width: clamp(width, 96, container.width - 24),
+      height: clamp(height, 96, container.height - 220),
+      containerWidth: container.width,
+      containerHeight: container.height,
+    });
+  }, [facingMode, topDetection?.bbox]);
+
+  useEffect(() => {
+    updateObjectBox();
+    window.addEventListener('resize', updateObjectBox);
+    return () => window.removeEventListener('resize', updateObjectBox);
+  }, [updateObjectBox]);
+
+  const ideasForDetection = topDetection ? getIdeasForObject(topDetection.class) : null;
+  const selectedIdea = selectedIdeaChoice?.className === topDetection?.class
+    ? ideasForDetection?.ideas?.[selectedIdeaChoice.index]
+    : null;
+  const SelectedModel =
+    IDEA_MODEL_MAP[selectedIdea?.id] ||
+    MODEL_MAP[topDetection?.class?.toLowerCase()] ||
+    MODEL_MAP.default;
+
+  const modelPreviewStyle = (() => {
+    if (!objectBox) return undefined;
+    const panelWidth = 168;
+    const panelHeight = 198;
+    const gutter = 12;
+    const placeRight = objectBox.left + objectBox.width + gutter + panelWidth < objectBox.containerWidth - 12;
+    const left = placeRight
+      ? objectBox.left + objectBox.width + gutter
+      : Math.max(12, objectBox.left - panelWidth - gutter);
+    const top = clamp(
+      objectBox.top + objectBox.height / 2 - panelHeight / 2,
+      112,
+      Math.max(112, objectBox.containerHeight - panelHeight - 148)
+    );
+    return { left, top };
+  })();
 
   const handleCapture = () => {
     setScanning(true);
@@ -165,17 +238,14 @@ const ScannerScreen = ({ onBack, onDetect }) => {
     setTimeout(() => {
       setScanning(false);
       setHighlightItem(null);
-      const ideas = getIdeasForObject(item.class);
-      onDetect({
-        detection: { class: item.class, score: item.score },
-        ideas,
-        imageSrc: null,
-      });
+      setTopDetection({ class: item.class, score: item.score, bbox: null });
+      setStatusMsg(`${item.class} - ${Math.round(item.score * 100)}% confident`);
+      setShowDemoPanel(false);
     }, 900);
   };
 
   return (
-    <div className="scanner-screen">
+    <div className="scanner-screen" ref={scannerRef}>
       <Webcam
         ref={webcamRef}
         className="scanner-webcam"
@@ -192,6 +262,31 @@ const ScannerScreen = ({ onBack, onDetect }) => {
       />
 
       <div className="scanner-overlay" />
+
+      <AnimatePresence>
+        {topDetection && !scanning && (
+          <motion.div
+            className="object-mask-layer"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className={`object-mask ${objectBox ? '' : 'object-mask--fallback'}`}
+              style={objectBox ? {
+                left: objectBox.left,
+                top: objectBox.top,
+                width: objectBox.width,
+                height: objectBox.height,
+              } : undefined}
+              layout
+            >
+              <div className="object-mask-fill" />
+              <span className="object-mask-chip">Masked scan</span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {cameraError && (
         <div className="camera-error-bg">
@@ -281,31 +376,63 @@ const ScannerScreen = ({ onBack, onDetect }) => {
       </div>
 
       {/* ── 3D Preview Panel (shows while scanning detects an item) ── */}
-      <AnimatePresence mode="wait">
-        {topDetection && !scanning && (
+      <AnimatePresence>
+        {topDetection && !scanning && ideasForDetection?.ideas?.length > 0 && (
           <motion.div
-            key={topDetection.class} // Re-mount if detection changes to restart animation
-            className="scan-3d-preview"
+            className="scan-recommendations"
+            initial={{ y: 28, opacity: 0, scale: 0.96 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 28, opacity: 0, scale: 0.96 }}
+            transition={{ type: 'spring', damping: 22, stiffness: 220 }}
+          >
+            <div className="scan-recommendations-header">
+              <span className="scan-recommendations-icon">{getClassIcon(topDetection.class)}</span>
+              <div>
+                <p className="scan-recommendations-title">Possible recyclable ideas</p>
+                <p className="scan-recommendations-sub">{ideasForDetection.label}</p>
+              </div>
+            </div>
+            <div className="scan-recommendation-list">
+              {ideasForDetection.ideas.map((idea, idx) => (
+                <motion.button
+                  key={idea.id}
+                  className={`scan-recommendation-btn ${
+                    selectedIdeaChoice?.className === topDetection.class && selectedIdeaChoice.index === idx ? 'active' : ''
+                  }`}
+                  id={`btn-scan-recommendation-${idea.id}`}
+                  onClick={() => setSelectedIdeaChoice({ className: topDetection.class, index: idx })}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <span className="recommendation-dot" />
+                  <span>{idea.title}</span>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence mode="wait">
+        {selectedIdea && !scanning && (
+          <motion.div
+            key={selectedIdea.id}
+            className={`scan-3d-preview ${objectBox ? '' : 'scan-3d-preview--fallback'}`}
+            style={modelPreviewStyle}
             initial={{ opacity: 0, scale: 0.7, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.7, y: 20 }}
             transition={{ type: 'spring', damping: 20, stiffness: 260 }}
           >
             <Canvas
-              camera={{ position: [0, 0.8, 2.8], fov: 52 }}
+              camera={{ position: [0, 1.2, 4.2], fov: 48 }}
               gl={{ antialias: true, alpha: true }}
               style={{ background: 'transparent', width: '100%', height: '100%' }}
             >
-              <PreviewScene 
-                modelClass={topDetection.class.toLowerCase()} 
-                onPhaseChange={setPreviewPhase} 
-                webcamRef={webcamRef}
-                bbox={topDetection.bbox}
-              />
+              <RecommendationScene ModelComponent={SelectedModel} />
             </Canvas>
-            <div className="scan-3d-label" style={{ marginTop: '-20px' }}>
-              <span className="scan-3d-tag">{previewPhase}</span>
-              <strong className="scan-3d-title">{getFirstIdeaTitle(topDetection.class)}</strong>
+            <div className="scan-3d-label">
+              <span className="scan-3d-tag">3D model</span>
+              <strong className="scan-3d-title">{selectedIdea.title}</strong>
             </div>
           </motion.div>
         )}
