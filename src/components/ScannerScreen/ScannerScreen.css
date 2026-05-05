@@ -777,6 +777,7 @@
 
   .scan-frame-wrapper {
     top: 50%;
+    left: clamp(390px, 40vw, 640px);
     width: min(44vw, 560px);
   }
 
@@ -786,9 +787,9 @@
   }
 
   .object-mask--fallback {
-    left: clamp(72px, 11vw, 180px);
+    left: clamp(64px, 8vw, 128px);
     top: 21%;
-    width: min(42vw, 520px);
+    width: min(34vw, 520px);
     height: min(52vh, 520px);
   }
 
@@ -824,8 +825,8 @@
     top: auto;
     right: clamp(40px, 6vw, 96px);
     bottom: 126px;
-    width: min(24vw, 270px);
-    height: min(28vw, 310px);
+    width: min(26vw, 330px);
+    height: min(30vw, 360px);
   }
 
   .scan-3d-preview--fallback {
