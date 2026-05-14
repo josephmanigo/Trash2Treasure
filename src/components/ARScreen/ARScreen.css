@@ -1,44 +1,46 @@
-.ar-phase-indicator {
-  position: absolute;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(17, 24, 39, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: 10px 20px;
-  border-radius: 30px;
-  color: white;
-  font-weight: 600;
-  font-size: 15px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  z-index: 10;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.ar-phase-indicator span {
-  background: linear-gradient(90deg, #fbbf24, #f59e0b);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
 .ar-screen {
   position: relative;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 50% 30%, #eef8f2 0%, #d5eedf 100%);
+  background:
+    radial-gradient(circle at 50% 28%, rgba(236, 253, 245, 0.96) 0%, rgba(213, 238, 223, 0.96) 54%, #cce8d6 100%),
+    linear-gradient(180deg, #f8fffb, #d5eedf);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.ar-screen--snapshot {
+  background: #000;
+}
+
+.ar-environment-snapshot {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-position: center;
+  background-size: cover;
+  /* Show the real room clearly — no heavy dark filter */
+  filter: saturate(1.05) contrast(1.02) brightness(0.88);
+  opacity: 0.92;
+  transform: scale(1.01);
+}
+
+/* No sci-fi grid overlay — background is the real camera image */
+.ar-screen::before {
+  display: none;
+}
+
+/* No fantasy glow blobs */
+.ar-screen::after {
+  display: none;
 }
 
 .ar-canvas-wrapper {
   position: absolute;
   inset: 0;
   z-index: 10;
+  overflow: visible;
 }
 
 /* ── Top Bar ── */
@@ -135,6 +137,8 @@
   border-radius: 32px 32px 0 0;
   padding: 12px 24px 32px;
   z-index: 30;
+  max-height: 38vh;
+  overflow-y: auto;
   box-shadow: 0 -12px 40px rgba(45,106,79,.12);
   border-top: 1px solid var(--color-border);
 }
@@ -144,6 +148,25 @@
   background: var(--color-border-strong);
   border-radius: var(--radius-full);
   margin: 0 auto 20px;
+}
+
+.ar-recommendation-head {
+  margin-bottom: 12px;
+}
+
+.ar-recommendation-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1.1;
+}
+
+.ar-recommendation-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
 }
 
 /* ── Tabs ── */
@@ -207,22 +230,35 @@
   gap: 12px;
 }
 
+.ar-idea-empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ar-idea-empty-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--g700);
+  background: var(--g50);
+  flex-shrink: 0;
+}
+
 .btn-icon.saved {
   background: #fffbeb;
   border-color: #fcd34d;
   color: #f59e0b;
 }
 
-@media (max-width: 430px) {
+@media (max-width: 899px) {
   .ar-top-bar {
     top: max(24px, calc(env(safe-area-inset-top) + 14px));
     left: max(14px, env(safe-area-inset-left));
     right: max(14px, env(safe-area-inset-right));
-  }
-
-  .ar-phase-indicator {
-    top: max(76px, calc(env(safe-area-inset-top) + 64px));
-    max-width: calc(100vw - 104px);
   }
 
   .ar-label-badge {
@@ -276,19 +312,15 @@
   }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 99999px) {
   .ar-canvas-wrapper {
-    right: min(38vw, 520px);
+    inset: 0;
   }
 
   .ar-top-bar {
     top: 32px;
     left: clamp(32px, 4vw, 64px);
     right: clamp(32px, 4vw, 64px);
-  }
-
-  .ar-phase-indicator {
-    top: 34px;
   }
 
   .ar-label-badge {
@@ -298,34 +330,58 @@
 
   .ar-controls-hint {
     top: 104px;
-    right: min(calc(38vw + 32px), 552px);
+    right: clamp(32px, 4vw, 64px);
   }
 
   .ar-bottom-sheet {
-    top: 0;
-    bottom: 0;
-    left: auto;
-    width: min(38vw, 520px);
-    border-radius: 0;
-    padding: 88px clamp(28px, 3vw, 48px) 42px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    top: auto;
+    bottom: 24px;
+    left: clamp(32px, 4vw, 64px);
+    right: clamp(32px, 4vw, 64px);
+    width: auto;
+    max-height: min(32vh, 268px);
+    border-radius: 28px;
+    padding: 16px clamp(22px, 3vw, 36px) 22px;
+    display: block;
     overflow-y: auto;
+    box-shadow: 0 18px 54px rgba(45,106,79,.2);
+    border: 1px solid rgba(255, 255, 255, 0.72);
   }
 
   .ar-sheet-handle {
-    display: none;
+    margin-bottom: 12px;
   }
 
   .ar-tabs-container {
-    margin-left: calc(clamp(28px, 3vw, 48px) * -1);
-    margin-right: calc(clamp(28px, 3vw, 48px) * -1);
-    padding-left: clamp(28px, 3vw, 48px);
-    padding-right: clamp(28px, 3vw, 48px);
+    margin-left: calc(clamp(22px, 3vw, 36px) * -1);
+    margin-right: calc(clamp(22px, 3vw, 36px) * -1);
+    padding-left: clamp(22px, 3vw, 36px);
+    padding-right: clamp(22px, 3vw, 36px);
+    padding-bottom: 12px;
+  }
+
+  .ar-idea-content {
+    display: grid;
+    grid-template-columns: minmax(240px, 0.8fr) minmax(320px, 1fr) minmax(220px, 0.6fr);
+    align-items: center;
+    gap: clamp(16px, 2.4vw, 32px);
+  }
+
+  .ar-idea-header,
+  .ar-idea-desc {
+    margin-bottom: 0;
+  }
+
+  .ar-idea-desc {
+    max-width: 680px;
   }
 
   .ar-idea-title {
-    font-size: clamp(26px, 2.4vw, 36px);
+    font-size: clamp(22px, 2vw, 30px);
+    margin-bottom: 10px;
+  }
+
+  .ar-idea-actions {
+    justify-content: flex-end;
   }
 }

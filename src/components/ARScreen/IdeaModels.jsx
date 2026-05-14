@@ -9,8 +9,7 @@ export function BirdFeederModel() {
   const g = useRef();
   useFrame(({ clock }) => {
     if (g.current) {
-      g.current.rotation.y = clock.elapsedTime * 0.3;
-      g.current.position.y = Math.sin(clock.elapsedTime * 0.8) * 0.06;
+      g.current.rotation.y = Math.sin(clock.elapsedTime * 0.24) * 0.1;
     }
   });
   return (
@@ -75,7 +74,7 @@ export function BirdFeederModel() {
 export function VerticalGardenModel() {
   const g = useRef();
   useFrame(({ clock }) => {
-    if (g.current) g.current.rotation.y = clock.elapsedTime * 0.25;
+    if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.2) * 0.1;
   });
   const tiers = [
     { y: -1.0, color: '#60a5fa', plant: '#22c55e' },
@@ -131,7 +130,7 @@ export function VerticalGardenModel() {
 export function SeedlingModel() {
   const g = useRef();
   useFrame(({ clock }) => {
-    if (g.current) g.current.rotation.y = clock.elapsedTime * 0.28;
+    if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.22) * 0.1;
   });
   const cups = [
     { x: -0.55, z:  0.0, seedling: '#22c55e', stage: 3 },
@@ -196,8 +195,8 @@ export function PaperBeadModel() {
   const g = useRef();
   useFrame(({ clock }) => {
     if (g.current) {
-      g.current.rotation.y = clock.elapsedTime * 0.4;
-      g.current.rotation.z = Math.sin(clock.elapsedTime * 0.5) * 0.08;
+      g.current.rotation.y = Math.sin(clock.elapsedTime * 0.32) * 0.12;
+      g.current.rotation.z = Math.sin(clock.elapsedTime * 0.5) * 0.04;
     }
   });
   const beadColors = [
@@ -242,7 +241,7 @@ export function PaperBeadModel() {
 export function PencilHolderModel() {
   const g = useRef();
   useFrame(({ clock }) => {
-    if (g.current) g.current.rotation.y = clock.elapsedTime * 0.35;
+    if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.28) * 0.1;
   });
   const pencils = [
     { a: 0,   color: '#f87171' },
@@ -314,7 +313,7 @@ export function CompostBinModel() {
   const steam1 = useRef();
   const steam2 = useRef();
   useFrame(({ clock }) => {
-    if (g.current) g.current.rotation.y = clock.elapsedTime * 0.28;
+    if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.22) * 0.1;
     if (steam1.current) steam1.current.position.y = 1.1 + ((clock.elapsedTime * 0.6) % 0.5);
     if (steam2.current) steam2.current.position.y = 1.3 + ((clock.elapsedTime * 0.6 + 0.25) % 0.5);
   });
@@ -417,7 +416,7 @@ export function PaintedVaseModel() {
 export function SeedBombModel() {
   const g = useRef();
   useFrame(({ clock }) => {
-    if (g.current) { g.current.rotation.y = clock.elapsedTime * 0.35; }
+    if (g.current) { g.current.rotation.y = Math.sin(clock.elapsedTime * 0.28) * 0.1; }
   });
   const colors = ['#78350f', '#92400e', '#713f12', '#854d0e', '#a16207'];
   return (
@@ -449,7 +448,7 @@ export function SeedBombModel() {
 // ──────────────────────────────────────────────────────
 export function PlanterBoxModel() {
   const g = useRef();
-  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = clock.elapsedTime * 0.28; });
+  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.22) * 0.1; });
   return (
     <group ref={g} position={[0, -0.3, 0]}>
       {/* Drawer box */}
@@ -486,7 +485,7 @@ export function PlanterBoxModel() {
 // ──────────────────────────────────────────────────────
 export function DonateBoxModel() {
   const g = useRef();
-  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = clock.elapsedTime * 0.3; });
+  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.24) * 0.1; });
   return (
     <group ref={g} position={[0, -0.3, 0]}>
       {/* Box */}
@@ -514,7 +513,7 @@ export function SteampunkArtModel() {
   const gear1 = useRef();
   const gear2 = useRef();
   useFrame(({ clock }) => {
-    if (g.current) g.current.rotation.y = clock.elapsedTime * 0.3;
+    if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.24) * 0.1;
     if (gear1.current) gear1.current.rotation.z = clock.elapsedTime * 0.8;
     if (gear2.current) gear2.current.rotation.z = -clock.elapsedTime * 1.2;
   });
@@ -550,7 +549,7 @@ export function SteampunkArtModel() {
 // ──────────────────────────────────────────────────────
 export function DigitalFrameModel() {
   const g = useRef();
-  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = clock.elapsedTime * 0.25; });
+  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.2) * 0.1; });
   return (
     <group ref={g} position={[0, -0.1, 0]}>
       {/* Frame border */}
@@ -574,7 +573,7 @@ export function DigitalFrameModel() {
 // ──────────────────────────────────────────────────────
 export function BraidedRugModel() {
   const g = useRef();
-  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = clock.elapsedTime * 0.3; });
+  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.24) * 0.1; });
   const ringColors = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6'];
   return (
     <group ref={g} position={[0, -0.5, 0]} rotation={[Math.PI / 2.5, 0, 0]}>

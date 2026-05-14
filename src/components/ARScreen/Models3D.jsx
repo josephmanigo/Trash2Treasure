@@ -7,11 +7,15 @@ import * as THREE from 'three';
 ───────────────────────────────────────── */
 export function PlantPotModel() {
   const g = useRef();
-  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = clock.elapsedTime * 0.4; });
+  useFrame(({ clock }) => {
+    if (g.current) {
+      g.current.rotation.y = Math.sin(clock.elapsedTime * 0.35) * 0.12;
+    }
+  });
   return (
-    <group ref={g}>
+    <group ref={g} position={[0, 0, 0]}>
       {/* Pot body */}
-      <mesh position={[0, -0.3, 0]} castShadow>
+      <mesh position={[0, 0.65, 0]} castShadow>
         <cylinderGeometry args={[0.62, 0.46, 1.3, 20]} />
         <meshStandardMaterial color="#A0732A" roughness={0.6} metalness={0.05} />
       </mesh>
@@ -62,7 +66,7 @@ export function PlantPotModel() {
 ───────────────────────────────────────── */
 export function OrganizerModel() {
   const g = useRef();
-  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = clock.elapsedTime * 0.3; });
+  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.3) * 0.1; });
   const cups = [
     { x: -0.58, h: 1.0, color: '#60a5fa' },
     { x: 0,     h: 1.3, color: '#4ade80' },
@@ -70,7 +74,7 @@ export function OrganizerModel() {
   ];
   const pencilColors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff9f43'];
   return (
-    <group ref={g} position={[0, -0.2, 0]}>
+    <group ref={g} position={[0, 0.1, 0]}>
       {/* Base plate */}
       <mesh position={[0, -0.05, 0]}>
         <boxGeometry args={[1.6, 0.1, 0.7]} />
@@ -119,12 +123,12 @@ export function OrigamiBoxModel() {
   const g = useRef();
   const lid = useRef();
   useFrame(({ clock }) => {
-    if (g.current) g.current.rotation.y = clock.elapsedTime * 0.35;
-    if (lid.current) lid.current.position.y = 1.02 + Math.sin(clock.elapsedTime * 1.2) * 0.12;
+    if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.28) * 0.1;
+    if (lid.current) lid.current.position.y = 0.72 + Math.sin(clock.elapsedTime * 1.2) * 0.04;
   });
   const foldColors = ['#F87171', '#FB923C', '#FBBF24', '#34D399', '#60A5FA', '#A78BFA'];
   return (
-    <group ref={g} position={[0, -0.2, 0]}>
+    <group ref={g} position={[0, 0, 0]}>
       {/* Box body */}
       <mesh position={[0, 0.35, 0]}>
         <boxGeometry args={[1.1, 0.7, 1.1]} />
@@ -176,8 +180,7 @@ export function CircuitBoardModel() {
   const g = useRef();
   useFrame(({ clock }) => {
     if (g.current) {
-      g.current.rotation.y = clock.elapsedTime * 0.28;
-      g.current.rotation.x = Math.sin(clock.elapsedTime * 0.6) * 0.08;
+      g.current.rotation.y = Math.sin(clock.elapsedTime * 0.22) * 0.12;
     }
   });
   const traces = [
@@ -187,7 +190,7 @@ export function CircuitBoardModel() {
     { x: 0.3,  z: 0.1, w: 0.5, d: 0.04 },
   ];
   return (
-    <group ref={g} position={[0, 0, 0]}>
+    <group ref={g} position={[0, 0.04, 0]}>
       {/* PCB board */}
       <mesh position={[0, 0, 0]}>
         <boxGeometry args={[1.4, 0.08, 1.1]} />
@@ -251,9 +254,9 @@ export function TinLanternModel() {
   const g = useRef();
   const glow = useRef();
   useFrame(({ clock }) => {
-    if (g.current) g.current.rotation.y = clock.elapsedTime * 0.35;
+    if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.28) * 0.1;
     if (glow.current) {
-      const s = 0.85 + Math.sin(clock.elapsedTime * 3) * 0.15;
+      const s = 0.85 + Math.sin(clock.elapsedTime * 3) * 0.08;
       glow.current.scale.set(s, s, s);
     }
   });
@@ -265,7 +268,7 @@ export function TinLanternModel() {
     }
   }
   return (
-    <group ref={g} position={[0, 0, 0]}>
+    <group ref={g} position={[0, 0.7, 0]}>
       {/* Can body shell */}
       <mesh position={[0, 0, 0]}>
         <cylinderGeometry args={[0.52, 0.52, 1.4, 24, 1, true]} />
@@ -322,8 +325,8 @@ export function ToteBagModel() {
   const g = useRef();
   useFrame(({ clock }) => {
     if (g.current) {
-      g.current.rotation.y = clock.elapsedTime * 0.32;
-      g.current.rotation.z = Math.sin(clock.elapsedTime * 0.7) * 0.05;
+      g.current.rotation.y = Math.sin(clock.elapsedTime * 0.25) * 0.1;
+      g.current.rotation.z = Math.sin(clock.elapsedTime * 0.5) * 0.03;
     }
   });
   return (
@@ -387,8 +390,8 @@ export function RecycleSymbol() {
   const g = useRef();
   useFrame(({ clock }) => {
     if (g.current) {
-      g.current.rotation.y = clock.elapsedTime * 0.5;
-      g.current.rotation.z = Math.sin(clock.elapsedTime * 0.8) * 0.1;
+      g.current.rotation.y = Math.sin(clock.elapsedTime * 0.4) * 0.15;
+      g.current.rotation.z = Math.sin(clock.elapsedTime * 0.6) * 0.05;
     }
   });
   return (
@@ -419,9 +422,9 @@ export function RecycleSymbol() {
 ───────────────────────────────────────── */
 export function GlassTerrariumModel() {
   const g = useRef();
-  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = clock.elapsedTime * 0.3; });
+  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.24) * 0.1; });
   return (
-    <group ref={g} position={[0, -0.3, 0]}>
+    <group ref={g} position={[0, 0.8, 0]}>
       {/* Glass jar */}
       <mesh><cylinderGeometry args={[0.6, 0.5, 1.6, 24, 1, true]} /><meshPhysicalMaterial color="#b0e0e6" roughness={0.05} metalness={0.1} transparent opacity={0.35} side={THREE.DoubleSide} /></mesh>
       {/* Glass bottom */}
@@ -467,11 +470,11 @@ export function OrganicCompostModel() {
   const g = useRef();
   const leaf1 = useRef();
   useFrame(({ clock }) => {
-    if (g.current) g.current.rotation.y = clock.elapsedTime * 0.25;
+    if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.2) * 0.1;
     if (leaf1.current) leaf1.current.rotation.z = Math.sin(clock.elapsedTime * 2) * 0.15;
   });
   return (
-    <group ref={g} position={[0, -0.2, 0]}>
+    <group ref={g} position={[0, 0.1, 0]}>
       {/* Barrel body */}
       <mesh position={[0, 0.4, 0]}><cylinderGeometry args={[0.65, 0.65, 1.2, 20]} /><meshStandardMaterial color="#365314" roughness={0.5} /></mesh>
       {/* Barrel bands */}
@@ -510,10 +513,10 @@ export function OrganicCompostModel() {
 ───────────────────────────────────────── */
 export function FurnitureShelfModel() {
   const g = useRef();
-  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = clock.elapsedTime * 0.28; });
+  useFrame(({ clock }) => { if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.22) * 0.1; });
   const bookColors = ['#ef4444','#3b82f6','#eab308','#22c55e','#a855f7','#ec4899','#f97316','#06b6d4'];
   return (
-    <group ref={g} position={[0, -0.3, 0]}>
+    <group ref={g} position={[0, 0.3, 0]}>
       {/* Side panels */}
       <mesh position={[-0.65, 0.5, 0]}><boxGeometry args={[0.06, 1.8, 0.7]} /><meshStandardMaterial color="#92400e" roughness={0.7} /></mesh>
       <mesh position={[0.65, 0.5, 0]}><boxGeometry args={[0.06, 1.8, 0.7]} /><meshStandardMaterial color="#92400e" roughness={0.7} /></mesh>
@@ -538,10 +541,10 @@ export function FurnitureShelfModel() {
 export function ToyRepairModel() {
   const g = useRef();
   useFrame(({ clock }) => {
-    if (g.current) { g.current.rotation.y = clock.elapsedTime * 0.35; g.current.position.y = Math.sin(clock.elapsedTime) * 0.05; }
+    if (g.current) { g.current.rotation.y = Math.sin(clock.elapsedTime * 0.28) * 0.1; }
   });
   return (
-    <group ref={g} position={[0, -0.2, 0]}>
+    <group ref={g} position={[0, 0.55, 0]}>
       {/* Body */}
       <mesh position={[0, 0, 0]}><sphereGeometry args={[0.55, 14, 14]} /><meshStandardMaterial color="#d4a574" roughness={0.9} /></mesh>
       {/* Head */}
@@ -577,11 +580,11 @@ export function ApplianceModel() {
   const g = useRef();
   const gear = useRef();
   useFrame(({ clock }) => {
-    if (g.current) g.current.rotation.y = clock.elapsedTime * 0.3;
+    if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.24) * 0.1;
     if (gear.current) gear.current.rotation.z = clock.elapsedTime * 1.5;
   });
   return (
-    <group ref={g} position={[0, -0.1, 0]}>
+    <group ref={g} position={[0, 0.45, 0]}>
       {/* Appliance body (microwave shape) */}
       <mesh position={[0, 0.2, 0]}><boxGeometry args={[1.3, 0.9, 0.85]} /><meshStandardMaterial color="#374151" roughness={0.3} metalness={0.5} /></mesh>
       {/* Door/window */}

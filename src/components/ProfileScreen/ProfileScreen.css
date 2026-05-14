@@ -398,7 +398,7 @@
   background: #b91c1c;
 }
 
-@media (max-width: 430px) {
+@media (max-width: 899px) {
   .profile-header,
   .profile-content,
   .profile-card,
@@ -428,7 +428,7 @@
   }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 99999px) {
   .profile-header {
     padding: 32px clamp(32px, 5vw, 72px) 24px;
   }

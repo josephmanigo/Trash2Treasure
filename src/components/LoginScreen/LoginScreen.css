@@ -362,7 +362,7 @@
   color: var(--g700);
 }
 
-@media (max-width: 430px) {
+@media (max-width: 899px) {
   .login-screen,
   .login-card,
   .login-form,
@@ -380,7 +380,7 @@
   }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 99999px) {
   .login-screen {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(380px, 0.8fr);

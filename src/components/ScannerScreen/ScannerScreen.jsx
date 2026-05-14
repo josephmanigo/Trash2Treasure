@@ -1,12 +1,14 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment, Float, ContactShadows } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { ContactShadows, Environment, Float, OrbitControls } from '@react-three/drei';
 import Webcam from 'react-webcam';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import '@tensorflow/tfjs';
-import { ArrowLeft, Zap, ZapOff, RefreshCw, Camera, Layers, Search, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug, ZoomIn, ZoomOut } from 'lucide-react';
+import * as THREE from 'three';
+import { ArrowLeft, Zap, ZapOff, RefreshCw, Camera, Layers, Search, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug } from 'lucide-react';
 import { getIdeasForObject } from '../../data/recyclingIdeas';
+import { RawModel } from '../ARScreen/ARScreen';
 import { IDEA_MODEL_MAP, MODEL_MAP } from '../ARScreen/ideaModelMap';
 import './ScannerScreen.css';
 
@@ -38,6 +40,12 @@ const DEMO_ITEMS = [
   { class: 'default',    label: 'Other Waste',       icon: Leaf,       color: '#34d399', score: 0.82 },
 ];
 
+const DETECTION_MEMORY_MS = 1700;
+const DETECTION_HOLD_MS = 900;
+const MIN_DETECTION_SCORE = 0.38;
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
 const getClassIcon = (cls) => {
   const item = DEMO_ITEMS.find(i =>
     i.class === cls ||
@@ -56,105 +64,209 @@ const getClassIcon = (cls) => {
   return <IconComponent size={20} />;
 };
 
-/* ── Mini 3D Preview Scene ── */
-const getMaskShape = (cls) => {
-  const value = cls?.toLowerCase() || '';
-  if (['bottle', 'wine glass', 'vase'].includes(value)) return 'bottle';
-  if (['cup', 'bowl'].includes(value)) return 'cup';
-  if (['book', 'laptop', 'keyboard', 'remote', 'tv'].includes(value)) return 'box';
-  if (['cell phone', 'mouse', 'clock'].includes(value)) return 'phone';
-  if (['scissors', 'knife', 'fork', 'spoon', 'toothbrush'].includes(value)) return 'can';
-  if (['chair', 'couch', 'bed', 'dining table', 'bench'].includes(value)) return 'chair';
-  return 'default';
+const getStableDetection = (history) => {
+  const groups = history.reduce((acc, item) => {
+    const entry = acc.get(item.class) || { class: item.class, total: 0, count: 0, best: item };
+    entry.total += item.score;
+    entry.count += 1;
+    if (item.score > entry.best.score) entry.best = item;
+    acc.set(item.class, entry);
+    return acc;
+  }, new Map());
+
+  const ranked = Array.from(groups.values())
+    .map((entry) => {
+      const average = entry.total / entry.count;
+      const stability = clamp(entry.count / 5, 0, 1);
+      return {
+        class: entry.class,
+        bbox: entry.best.bbox,
+        score: clamp((average * 0.72) + (entry.best.score * 0.16) + (stability * 0.12), 0, 0.99),
+        count: entry.count,
+      };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  const candidate = ranked[0];
+  if (!candidate) return null;
+  if (candidate.count < 2 && candidate.score < 0.78) return null;
+  return candidate;
 };
 
-function WireframeMask({ shape }) {
-  const path = {
-    bottle: 'M38 8 H62 V20 C62 25 67 29 68 38 L73 82 C74 90 68 96 60 96 H40 C32 96 26 90 27 82 L32 38 C33 29 38 25 38 20 Z',
-    cup: 'M25 18 H75 L68 92 H32 Z',
-    box: 'M20 22 H80 V82 H20 Z',
-    phone: 'M35 10 H65 C70 10 73 14 73 19 V86 C73 92 69 96 63 96 H37 C31 96 27 92 27 86 V19 C27 14 30 10 35 10 Z',
-    can: 'M30 16 C30 10 70 10 70 16 V86 C70 94 30 94 30 86 Z',
-    chair: 'M27 22 H73 C78 22 82 26 82 32 V58 H72 V88 H62 V58 H38 V88 H28 V58 H18 V32 C18 26 22 22 27 22 Z',
-    default: 'M22 28 C30 12 66 8 78 29 C91 53 75 90 51 94 C27 98 8 66 22 28 Z',
-  }[shape] || 'M22 28 C30 12 66 8 78 29 C91 53 75 90 51 94 C27 98 8 66 22 28 Z';
+function ShadowedModel({ children }) {
+  const groupRef = useRef(null);
+
+  useEffect(() => {
+    if (!groupRef.current) return;
+    groupRef.current.traverse((node) => {
+      if (node.isMesh) {
+        node.castShadow = true;
+        node.receiveShadow = true;
+      }
+    });
+  }, [children]);
+
+  return <group ref={groupRef}>{children}</group>;
+}
+
+function ScanTerrain() {
+  const outerRingRef = useRef(null);
+  const innerRingRef = useRef(null);
+  const glowRef = useRef(null);
+
+  useFrame(({ clock }) => {
+    const time = clock.elapsedTime;
+    if (outerRingRef.current) outerRingRef.current.rotation.z = time * 0.24;
+    if (innerRingRef.current) innerRingRef.current.rotation.z = -time * 0.34;
+    if (glowRef.current) {
+      const pulse = 1 + Math.sin(time * 2.2) * 0.035;
+      glowRef.current.scale.set(pulse, pulse, pulse);
+    }
+  });
 
   return (
-    <svg className="object-mask-wireframe" viewBox="0 0 100 100" aria-hidden="true">
-      <path className="wireframe-shadow" d={path} />
-      <path className="wireframe-outline" d={path} />
-      {[18, 28, 38, 48, 58, 68, 78, 88].map(y => (
-        <path key={`h-${y}`} className="wireframe-line" d={`M18 ${y} H82`} />
-      ))}
-      {[24, 34, 44, 54, 64, 74].map(x => (
-        <path key={`v-${x}`} className="wireframe-line wireframe-line--soft" d={`M${x} 12 C${x - 6} 34 ${x - 6} 68 ${x} 94`} />
-      ))}
-      <path className="wireframe-line wireframe-line--soft" d="M18 50 C36 42 62 58 82 47" />
-      <path className="wireframe-line wireframe-line--soft" d="M20 66 C39 75 60 56 80 70" />
-    </svg>
+    <group position={[0, -1.08, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh receiveShadow>
+        <circleGeometry args={[2.65, 96]} />
+        <meshStandardMaterial color="#dff7e8" roughness={0.9} transparent opacity={0.18} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh ref={glowRef}>
+        <ringGeometry args={[0.62, 1.34, 128]} />
+        <meshBasicMaterial color="#22c55e" transparent opacity={0.08} side={THREE.DoubleSide} depthWrite={false} />
+      </mesh>
+      <mesh ref={outerRingRef}>
+        <torusGeometry args={[1.22, 0.014, 8, 128]} />
+        <meshBasicMaterial color="#86efac" transparent opacity={0.68} />
+      </mesh>
+      <mesh ref={innerRingRef}>
+        <torusGeometry args={[0.78, 0.009, 8, 96]} />
+        <meshBasicMaterial color="#2dd4bf" transparent opacity={0.42} />
+      </mesh>
+    </group>
   );
 }
 
-const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+function ScanArrow() {
+  const arrowRef = useRef(null);
+  const pulseRef = useRef(null);
 
-function RecommendationScene({ ModelComponent, modelZoom }) {
+  useFrame(({ clock }) => {
+    const time = clock.elapsedTime;
+    if (arrowRef.current) arrowRef.current.position.x = Math.sin(time * 2.8) * 0.08;
+    if (pulseRef.current) {
+      const pulse = 1 + Math.sin(time * 3.4) * 0.16;
+      pulseRef.current.scale.set(pulse, pulse, pulse);
+    }
+  });
+
+  return (
+    <group ref={arrowRef} position={[0, 0.06, 0]} rotation={[0, 0, -Math.PI / 2]}>
+      <mesh castShadow>
+        <cylinderGeometry args={[0.055, 0.055, 0.9, 24]} />
+        <meshStandardMaterial color="#22c55e" emissive="#16a34a" emissiveIntensity={0.45} roughness={0.22} metalness={0.25} />
+      </mesh>
+      <mesh position={[0, 0.58, 0]} castShadow>
+        <coneGeometry args={[0.18, 0.34, 32]} />
+        <meshStandardMaterial color="#bbf7d0" emissive="#22c55e" emissiveIntensity={0.8} roughness={0.18} metalness={0.2} />
+      </mesh>
+      <mesh ref={pulseRef} position={[0, 0.04, 0]}>
+        <torusGeometry args={[0.34, 0.012, 8, 72]} />
+        <meshBasicMaterial color="#86efac" transparent opacity={0.38} />
+      </mesh>
+    </group>
+  );
+}
+
+function ScanARScene({ detectedClass, ResultModel, selected }) {
   return (
     <>
       <ambientLight intensity={0.95} />
-      <hemisphereLight args={['#ffffff', '#254233', 0.85]} />
-      <directionalLight position={[3, 6, 4]} intensity={1.35} castShadow />
+      <hemisphereLight args={['#ffffff', '#10261d', 0.82]} />
+      <directionalLight position={[4, 7, 5]} intensity={1.55} castShadow />
+      <directionalLight position={[-4, 4, -3]} intensity={0.55} color="#86efac" />
+      <spotLight position={[0, 5.2, 4.4]} angle={0.42} penumbra={0.8} intensity={1.35} color="#ffffff" castShadow />
+      <pointLight position={[1.6, 1.2, 2.2]} intensity={0.75} color="#6ee7b7" distance={5} />
+      <Environment preset="city" />
       <OrbitControls
         enableZoom
         enablePan={false}
         autoRotate={false}
-        minDistance={2.3}
-        maxDistance={7}
-        maxPolarAngle={Math.PI / 1.85}
+        minDistance={3}
+        maxDistance={8.2}
+        maxPolarAngle={Math.PI / 1.75}
       />
-      <Environment preset="city" />
-      <group scale={modelZoom}>
-        <Float speed={1.1} rotationIntensity={0.08} floatIntensity={0.08}>
-          <ModelComponent />
-        </Float>
-      </group>
-      <ContactShadows position={[0, -1.08, 0]} opacity={0.42} scale={5.5} blur={2.6} far={4} />
+      <ScanTerrain />
+      {!selected && (
+        <group position={[0, 0.18, 0]} scale={1.2}>
+          <Float speed={1.15} rotationIntensity={0.08} floatIntensity={0.08}>
+            <ShadowedModel>
+              <RawModel detectedClass={detectedClass} />
+            </ShadowedModel>
+          </Float>
+        </group>
+      )}
+      {selected && (
+        <>
+          <group position={[-1.18, 0.15, 0]} scale={0.82}>
+            <Float speed={1.1} rotationIntensity={0.08} floatIntensity={0.08}>
+              <ShadowedModel>
+                <RawModel detectedClass={detectedClass} />
+              </ShadowedModel>
+            </Float>
+          </group>
+          <ScanArrow />
+          <group position={[1.18, 0.15, 0]} scale={0.82}>
+            <Float speed={1.1} rotationIntensity={0.08} floatIntensity={0.08}>
+              <ShadowedModel>
+                <ResultModel />
+              </ShadowedModel>
+            </Float>
+          </group>
+        </>
+      )}
+      <ContactShadows position={[0, -1.08, 0]} opacity={0.38} scale={6.2} blur={2.8} far={4.5} />
     </>
   );
 }
 
 const ScannerScreen = ({ onBack, onDetect }) => {
-  const scannerRef = useRef(null);
-  const webcamRef  = useRef(null);
-  const animFrame  = useRef(null);
+  const webcamRef = useRef(null);
+  const animFrame = useRef(null);
+  const detectionHistoryRef = useRef([]);
+  const lastDetectionRef = useRef({ detection: null, seenAt: 0 });
+  const lastDetectedClassRef = useRef(null);
 
-  const [model,          setModel]          = useState(null);
-  const [loading,        setLoading]        = useState(true);
-  const [flashOn,        setFlashOn]        = useState(false);
-  const [facingMode,     setFacingMode]     = useState('environment');
-  const [scanning,       setScanning]       = useState(false);
-  const [statusMsg,      setStatusMsg]      = useState('Loading AI model...');
-  const [topDetection,   setTopDetection]   = useState(null);
-  const [showDemoPanel,  setShowDemoPanel]  = useState(false);
-  const [highlightItem,  setHighlightItem]  = useState(null);
-  const [cameraError,    setCameraError]    = useState(false);
+  const [model, setModel] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [flashOn, setFlashOn] = useState(false);
+  const [facingMode, setFacingMode] = useState('environment');
+  const [scanning, setScanning] = useState(false);
+  const [statusMsg, setStatusMsg] = useState('Loading high-accuracy scanner...');
+  const [topDetection, setTopDetection] = useState(null);
+  const [showDemoPanel, setShowDemoPanel] = useState(false);
+  const [highlightItem, setHighlightItem] = useState(null);
+  const [cameraError, setCameraError] = useState(false);
   const [selectedIdeaChoice, setSelectedIdeaChoice] = useState(null);
-  const [objectBox,      setObjectBox]      = useState(null);
-  const [modelZoom,      setModelZoom]      = useState(1.35);
 
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       try {
-        const m = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
+        let loadedModel;
+        try {
+          loadedModel = await cocoSsd.load({ base: 'mobilenet_v2' });
+        } catch {
+          loadedModel = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
+        }
         if (mounted) {
-          setModel(m);
+          setModel(loadedModel);
           setLoading(false);
-          setStatusMsg('Point camera at a waste item');
+          setStatusMsg('Point camera at a recyclable item');
         }
       } catch {
         if (mounted) {
           setLoading(false);
-          setStatusMsg('Demo mode — pick an item below');
+          setStatusMsg('Demo mode - pick an item below');
           setShowDemoPanel(true);
         }
       }
@@ -163,25 +275,59 @@ const ScannerScreen = ({ onBack, onDetect }) => {
     return () => { mounted = false; };
   }, []);
 
+  const updateDetection = useCallback((nextDetection) => {
+    const nextClass = nextDetection?.class || null;
+    if (lastDetectedClassRef.current !== nextClass) {
+      lastDetectedClassRef.current = nextClass;
+      setSelectedIdeaChoice(null);
+    }
+    setTopDetection(nextDetection);
+    if (nextDetection) {
+      setStatusMsg(`${nextDetection.class} - ${Math.round(nextDetection.score * 100)}% confident`);
+    } else {
+      setStatusMsg('Point camera at a recyclable item');
+    }
+  }, []);
+
   const detect = useCallback(async () => {
     if (!model || !webcamRef.current) return;
     const video = webcamRef.current.video;
     if (!video || video.readyState !== 4) return;
+
     try {
-      const preds    = await model.detect(video);
-      const relevant = preds.filter(p => RECYCLABLE.includes(p.class) && p.score > 0.35);
-      if (relevant.length > 0) {
-        const top = relevant.reduce((a, b) => a.score > b.score ? a : b);
-        setTopDetection(top);
-        setStatusMsg(`${top.class} — ${Math.round(top.score * 100)}% confident`);
-      } else {
-        setTopDetection(null);
-        setStatusMsg('Point camera at a waste item');
+      const now = performance.now();
+      const preds = await model.detect(video, 12, MIN_DETECTION_SCORE);
+      const relevant = preds
+        .filter(p => RECYCLABLE.includes(p.class) && p.score >= MIN_DETECTION_SCORE)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+
+      detectionHistoryRef.current = detectionHistoryRef.current
+        .filter(item => now - item.seenAt < DETECTION_MEMORY_MS)
+        .concat(relevant.map(item => ({
+          class: item.class,
+          score: item.score,
+          bbox: item.bbox,
+          seenAt: now,
+        })));
+
+      const stableDetection = getStableDetection(detectionHistoryRef.current);
+      if (stableDetection) {
+        lastDetectionRef.current = { detection: stableDetection, seenAt: now };
+        updateDetection(stableDetection);
+        return;
+      }
+
+      const last = lastDetectionRef.current;
+      if (last.detection && now - last.seenAt < DETECTION_HOLD_MS) {
+        updateDetection(last.detection);
+      } else if (relevant.length === 0) {
+        updateDetection(null);
       }
     } catch {
       return;
     }
-  }, [model]);
+  }, [model, updateDetection]);
 
   useEffect(() => {
     if (loading || !model || scanning) return undefined;
@@ -199,100 +345,39 @@ const ScannerScreen = ({ onBack, onDetect }) => {
     };
   }, [detect, loading, model, scanning]);
 
-  const updateObjectBox = useCallback(() => {
-    const shell = scannerRef.current;
-    const video = webcamRef.current?.video;
-    const bbox = topDetection?.bbox;
-
-    if (!shell) return;
-
-    const container = shell.getBoundingClientRect();
-    if (!bbox || !video?.videoWidth || !video?.videoHeight) {
-      setObjectBox(null);
-      return;
-    }
-
-    const [rawX, rawY, rawW, rawH] = bbox;
-    const padX = rawW * 0.08;
-    const padY = rawH * 0.08;
-    const paddedX = rawX - padX;
-    const paddedY = rawY - padY;
-    const paddedW = rawW + padX * 2;
-    const paddedH = rawH + padY * 2;
-    const scale = Math.max(
-      container.width / video.videoWidth,
-      container.height / video.videoHeight
-    );
-    const renderedWidth = video.videoWidth * scale;
-    const renderedHeight = video.videoHeight * scale;
-    const offsetX = (container.width - renderedWidth) / 2;
-    const offsetY = (container.height - renderedHeight) / 2;
-    const width = paddedW * scale;
-    const height = paddedH * scale;
-    const mappedX = paddedX * scale + offsetX;
-    const left = facingMode === 'user'
-      ? container.width - (mappedX + width)
-      : mappedX;
-
-    setObjectBox({
-      left: clamp(left, 12, Math.max(12, container.width - width - 12)),
-      top: clamp(paddedY * scale + offsetY, 88, Math.max(88, container.height - height - 112)),
-      width: clamp(width, 76, container.width - 24),
-      height: clamp(height, 76, container.height - 160),
-      containerWidth: container.width,
-      containerHeight: container.height,
-    });
-  }, [facingMode, topDetection?.bbox]);
-
-  useEffect(() => {
-    updateObjectBox();
-    window.addEventListener('resize', updateObjectBox);
-    return () => window.removeEventListener('resize', updateObjectBox);
-  }, [updateObjectBox]);
-
   const ideasForDetection = topDetection ? getIdeasForObject(topDetection.class) : null;
   const selectedIdea = selectedIdeaChoice?.className === topDetection?.class
     ? ideasForDetection?.ideas?.[selectedIdeaChoice.index]
     : null;
-  const SelectedModel =
+  const ResultModel =
     IDEA_MODEL_MAP[selectedIdea?.id] ||
     MODEL_MAP[topDetection?.class?.toLowerCase()] ||
     MODEL_MAP.default;
-
-  useEffect(() => {
-    if (selectedIdea?.id) setModelZoom(1.35);
-  }, [selectedIdea?.id]);
-
-  const modelPreviewStyle = (() => {
-    if (!objectBox) return undefined;
-    const panelWidth = clamp(objectBox.containerWidth * 0.32, 230, 440);
-    const panelHeight = clamp(objectBox.containerHeight * 0.46, 300, 520);
-    const gutter = 12;
-    const placeRight = objectBox.left + objectBox.width + gutter + panelWidth < objectBox.containerWidth - 12;
-    const placeLeft = objectBox.left - gutter - panelWidth > 12;
-    const left = placeRight
-      ? objectBox.left + objectBox.width + gutter
-      : placeLeft
-        ? objectBox.left - panelWidth - gutter
-        : clamp(objectBox.left + objectBox.width / 2 - panelWidth / 2, 12, objectBox.containerWidth - panelWidth - 12);
-    const top = clamp(
-      objectBox.top + objectBox.height / 2 - panelHeight / 2,
-      96,
-      Math.max(96, objectBox.containerHeight - panelHeight - 112)
-    );
-    return { left, top, width: panelWidth, height: panelHeight };
-  })();
 
   const handleCapture = () => {
     setScanning(true);
     if (animFrame.current) cancelAnimationFrame(animFrame.current);
     const imageSrc = webcamRef.current?.getScreenshot();
     setTimeout(() => {
+      const detection = topDetection || lastDetectionRef.current.detection || { class: 'bottle', score: 0.87 };
+      const ideas = getIdeasForObject(detection.class);
+      detectionHistoryRef.current = [];
+      lastDetectionRef.current = { detection, seenAt: performance.now() };
+      updateDetection(detection);
       setScanning(false);
-      const det   = topDetection || { class: 'bottle', score: 0.87 };
-      const ideas = getIdeasForObject(det.class);
-      onDetect({ detection: det, ideas, imageSrc });
-    }, 1200);
+      onDetect?.({
+        detection: {
+          ...detection,
+          source: 'recognition-asset-match',
+        },
+        ideas,
+        imageSrc,
+        reconstruction: {
+          method: 'class-recognition-asset-match',
+          realisticLimit: 'Web AR cannot reconstruct every real object at 99% geometric accuracy without multi-view photogrammetry or a cloud 3D generation service.',
+        },
+      });
+    }, 950);
   };
 
   const handleDemoPick = (item) => {
@@ -301,53 +386,68 @@ const ScannerScreen = ({ onBack, onDetect }) => {
     setTimeout(() => {
       setScanning(false);
       setHighlightItem(null);
-      setTopDetection({ class: item.class, score: item.score, bbox: null });
-      setStatusMsg(`${item.class} - ${Math.round(item.score * 100)}% confident`);
+      const detection = { class: item.class, score: item.score, bbox: null };
+      detectionHistoryRef.current = [];
+      lastDetectionRef.current = { detection, seenAt: performance.now() };
+      updateDetection(detection);
       setShowDemoPanel(false);
-    }, 900);
+    }, 700);
   };
 
   return (
-    <div className="scanner-screen" ref={scannerRef}>
+    <div className="scanner-screen">
       <Webcam
         ref={webcamRef}
         className="scanner-webcam"
-        videoConstraints={{ facingMode, aspectRatio: 9 / 16 }}
+        videoConstraints={{
+          facingMode,
+          aspectRatio: 9 / 16,
+          width: { ideal: 1280 },
+          height: { ideal: 1920 },
+        }}
         screenshotFormat="image/jpeg"
-        screenshotQuality={0.8}
+        screenshotQuality={0.92}
         mirrored={facingMode === 'user'}
         audio={false}
         onUserMediaError={() => {
           setCameraError(true);
           setShowDemoPanel(true);
-          setStatusMsg('No camera — pick an item below');
+          setStatusMsg('No camera - pick an item below');
         }}
       />
 
       <div className="scanner-overlay" />
 
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {topDetection && !scanning && (
           <motion.div
-            className="object-mask-layer"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            key={`${topDetection.class}-${selectedIdea?.id || 'source'}`}
+            className="scan-live-ar-preview"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.28, ease: 'easeOut' }}
           >
-            <motion.div
-              className={`object-mask object-mask--${getMaskShape(topDetection.class)} ${objectBox ? '' : 'object-mask--fallback'}`}
-              style={objectBox ? {
-                left: objectBox.left,
-                top: objectBox.top,
-                width: objectBox.width,
-                height: objectBox.height,
-              } : undefined}
-              layout
+            <Canvas
+              camera={{ position: [0, 1.25, 5.6], fov: 42 }}
+              shadows
+              gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+              dpr={[1, 2]}
+              style={{ background: 'transparent', width: '100%', height: '100%' }}
+              onCreated={({ gl }) => {
+                gl.toneMapping = THREE.ACESFilmicToneMapping;
+                gl.toneMappingExposure = 1.16;
+                gl.shadowMap.enabled = true;
+                gl.shadowMap.type = THREE.PCFSoftShadowMap;
+                if (THREE.SRGBColorSpace) gl.outputColorSpace = THREE.SRGBColorSpace;
+              }}
             >
-              <div className="object-mask-fill" />
-              <WireframeMask shape={getMaskShape(topDetection.class)} />
-              <span className="object-mask-chip">Masked scan</span>
-            </motion.div>
+              <ScanARScene
+                detectedClass={topDetection.class}
+                ResultModel={ResultModel}
+                selected={Boolean(selectedIdea)}
+              />
+            </Canvas>
           </motion.div>
         )}
       </AnimatePresence>
@@ -372,7 +472,6 @@ const ScannerScreen = ({ onBack, onDetect }) => {
         )}
       </AnimatePresence>
 
-      {/* ── Top Bar ── */}
       <div className="scanner-top-bar">
         <motion.button className="scanner-icon-btn" id="btn-scanner-back" onClick={onBack} whileTap={{ scale: 0.9 }}>
           <ArrowLeft size={20} />
@@ -405,7 +504,6 @@ const ScannerScreen = ({ onBack, onDetect }) => {
         </motion.button>
       </div>
 
-      {/* ── Scan Guide ── */}
       <AnimatePresence>
         {!topDetection && (
           <motion.div
@@ -425,50 +523,14 @@ const ScannerScreen = ({ onBack, onDetect }) => {
         )}
       </AnimatePresence>
 
-      {/*
-      <div className="scan-frame-wrapper">
-        <div className={`scan-frame ${topDetection ? 'scan-frame--active' : ''}`}>
-          <span className="corner corner-tl" /><span className="corner corner-tr" />
-          <span className="corner corner-bl" /><span className="corner corner-br" />
-          {!loading && <div className="scan-line" />}
-          
-          {topDetection && (
-            <motion.div
-              className="detection-label"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-            >
-              <div className="detection-icon-wrap">
-                {getClassIcon(topDetection.class)}
-              </div>
-              <div className="detection-info">
-                <span className="detection-class">{topDetection.class}</span>
-                <span className="detection-conf">{Math.round(topDetection.score * 100)}% match</span>
-              </div>
-            </motion.div>
-          )}
-        </div>
-        <p className="scan-hint">
-          {loading
-            ? 'Loading AI model…'
-            : topDetection
-              ? 'Item detected! Ready to capture.'
-              : cameraError
-                ? 'Select an item from the demo panel below.'
-                : 'Center the waste item in the frame'}
-        </p>
-      </div>
-      */}
-
-      {/* ── 3D Preview Panel (shows while scanning detects an item) ── */}
       <AnimatePresence>
         {topDetection && !scanning && ideasForDetection?.ideas?.length > 0 && (
           <motion.div
             className="scan-recommendations"
-            initial={{ y: 28, opacity: 0, scale: 0.96 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 28, opacity: 0, scale: 0.96 }}
-            transition={{ type: 'spring', damping: 22, stiffness: 220 }}
+            initial={{ opacity: 0, y: 16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 220 }}
           >
             <div className="scan-recommendations-header">
               <span className="scan-recommendations-icon">{getClassIcon(topDetection.class)}</span>
@@ -481,6 +543,7 @@ const ScannerScreen = ({ onBack, onDetect }) => {
               {ideasForDetection.ideas.map((idea, idx) => (
                 <motion.button
                   key={idea.id}
+                  type="button"
                   className={`scan-recommendation-btn ${
                     selectedIdeaChoice?.className === topDetection.class && selectedIdeaChoice.index === idx ? 'active' : ''
                   }`}
@@ -497,53 +560,6 @@ const ScannerScreen = ({ onBack, onDetect }) => {
         )}
       </AnimatePresence>
 
-      <AnimatePresence mode="wait">
-        {selectedIdea && !scanning && (
-          <motion.div
-            key={selectedIdea.id}
-            className={`scan-3d-preview ${objectBox ? '' : 'scan-3d-preview--fallback'}`}
-            style={modelPreviewStyle}
-            initial={{ opacity: 0, scale: 0.7, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.7, y: 20 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 260 }}
-          >
-            <div className="scan-3d-environment-shadow" />
-            <Canvas
-              camera={{ position: [0, 1.1, 4.4], fov: 42 }}
-              gl={{ antialias: true, alpha: true }}
-              style={{ background: 'transparent', width: '100%', height: '100%' }}
-              shadows
-            >
-              <RecommendationScene ModelComponent={SelectedModel} modelZoom={modelZoom} />
-            </Canvas>
-            <div className="scan-3d-zoom-controls" aria-label="3D zoom controls">
-              <button
-                type="button"
-                className="scan-3d-zoom-btn"
-                onClick={() => setModelZoom(z => clamp(z + 0.18, 0.8, 2.3))}
-                aria-label="Zoom 3D model in"
-              >
-                <ZoomIn size={17} />
-              </button>
-              <button
-                type="button"
-                className="scan-3d-zoom-btn"
-                onClick={() => setModelZoom(z => clamp(z - 0.18, 0.8, 2.3))}
-                aria-label="Zoom 3D model out"
-              >
-                <ZoomOut size={17} />
-              </button>
-            </div>
-            <div className="scan-3d-label">
-              <span className="scan-3d-tag">3D model</span>
-              <strong className="scan-3d-title">{selectedIdea.title}</strong>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Bottom Controls ── */}
       <div className="scanner-bottom">
         <motion.button
           className="scanner-icon-btn"
@@ -558,7 +574,7 @@ const ScannerScreen = ({ onBack, onDetect }) => {
           className={`capture-btn ${scanning ? 'capturing' : ''} ${topDetection ? 'ready' : ''}`}
           id="btn-capture"
           onClick={handleCapture}
-          disabled={scanning}
+          disabled={scanning || loading}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.92 }}
         >
@@ -566,19 +582,17 @@ const ScannerScreen = ({ onBack, onDetect }) => {
           {topDetection && <div className="capture-ring" />}
         </motion.button>
 
-        {/* Demo Toggle */}
         <motion.button
           className={`scanner-icon-btn demo-toggle-btn ${showDemoPanel ? 'demo-active' : ''}`}
           id="btn-demo-toggle"
           onClick={() => setShowDemoPanel(s => !s)}
           whileTap={{ scale: 0.9 }}
-          title="Demo mode — pick any item"
+          title="Demo mode - pick any item"
         >
           <Layers size={20} />
         </motion.button>
       </div>
 
-      {/* ── Demo Panel ── */}
       <AnimatePresence>
         {showDemoPanel && (
           <motion.div
@@ -591,7 +605,7 @@ const ScannerScreen = ({ onBack, onDetect }) => {
             <div className="demo-panel-handle" />
             <div className="demo-panel-header">
               <p className="demo-panel-title">Demo Mode</p>
-              <p className="demo-panel-sub">Tap any item to see its 3D AR model</p>
+              <p className="demo-panel-sub">Tap any item to test the 3D AR flow</p>
             </div>
             <div className="demo-grid">
               {DEMO_ITEMS.map(item => {
@@ -619,7 +633,7 @@ const ScannerScreen = ({ onBack, onDetect }) => {
                       />
                     )}
                   </motion.button>
-                )
+                );
               })}
             </div>
           </motion.div>

@@ -317,7 +317,7 @@
   line-height: 1.5;
 }
 
-@media (max-width: 430px) {
+@media (max-width: 899px) {
   .home-nav,
   .home-body,
   .home-hero-card,
@@ -363,7 +363,7 @@
   }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 99999px) {
   .home-nav {
     padding: 28px clamp(32px, 5vw, 72px) 20px;
   }

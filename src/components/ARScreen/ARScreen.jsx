@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment, Float } from '@react-three/drei';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, ContactShadows } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Star, ChevronRight, RotateCcw, Maximize2, Share2, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug, Sparkles as SparklesIcon } from 'lucide-react';
+import { ArrowLeft, Star, ChevronRight, RotateCcw, Maximize2, Share2, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug } from 'lucide-react';
 import { IDEA_MODEL_MAP, MODEL_MAP } from './ideaModelMap';
 import * as THREE from 'three';
 import './ARScreen.css';
@@ -205,9 +205,31 @@ export const RawModel = ({ detectedClass }) => {
   );
 };
 
+const seededRandom = (seed) => {
+  const value = Math.sin(seed * 999.91) * 10000;
+  return value - Math.floor(value);
+};
+
 // Particles for magical transformation
 export const MagicalParticles = () => {
   const particlesRef = useRef();
+  const particles = useMemo(() => (
+    Array.from({ length: 40 }).map((_, i) => {
+      const theta = seededRandom(i + 1) * Math.PI * 2;
+      const phi = Math.acos(seededRandom(i + 101) * 2 - 1);
+      const radius = 0.5 + seededRandom(i + 201) * 0.8;
+
+      return {
+        id: i,
+        position: [
+          radius * Math.sin(phi) * Math.cos(theta),
+          radius * Math.sin(phi) * Math.sin(theta),
+          radius * Math.cos(phi),
+        ],
+        rotation: [seededRandom(i + 301), seededRandom(i + 401), seededRandom(i + 501)],
+      };
+    })
+  ), []);
   
   useFrame((state) => {
     if (particlesRef.current) {
@@ -218,28 +240,17 @@ export const MagicalParticles = () => {
   // We use simple boxes as particles to avoid depending on <Sparkles> if missing from older drei
   return (
     <group ref={particlesRef}>
-      {Array.from({ length: 40 }).map((_, i) => {
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(Math.random() * 2 - 1);
-        const radius = 0.5 + Math.random() * 0.8;
-        const x = radius * Math.sin(phi) * Math.cos(theta);
-        const y = radius * Math.sin(phi) * Math.sin(theta);
-        const z = radius * Math.cos(phi);
-        return (
-          <mesh key={i} position={[x, y, z]} rotation={[Math.random(), Math.random(), Math.random()]}>
-            <octahedronGeometry args={[0.04, 0]} />
-            <meshStandardMaterial color={['#4ade80', '#fbbf24', '#38bdf8', '#a78bfa'][i % 4]} emissive={['#22c55e', '#f59e0b', '#0284c7', '#7c3aed'][i % 4]} emissiveIntensity={2} />
-          </mesh>
-        );
-      })}
+      {particles.map(({ id, position, rotation }) => (
+        <mesh key={id} position={position} rotation={rotation}>
+          <octahedronGeometry args={[0.04, 0]} />
+          <meshStandardMaterial color={['#4ade80', '#fbbf24', '#38bdf8', '#a78bfa'][id % 4]} emissive={['#22c55e', '#f59e0b', '#0284c7', '#7c3aed'][id % 4]} emissiveIntensity={2} />
+        </mesh>
+      ))}
     </group>
   );
 };
 
-import { useFrame } from '@react-three/fiber';
-import { useRef, useEffect, useMemo } from 'react';
-
-export function TransformationWrapper({ ModelComponent, detectedClass, onPhaseChange, webcamRef, bbox }) {
+export function TransformationWrapper({ ModelComponent, detectedClass, onPhaseChange }) {
   const rawRef = useRef();
   const finalRef = useRef();
   const particlesRef = useRef();
@@ -297,17 +308,125 @@ export function TransformationWrapper({ ModelComponent, detectedClass, onPhaseCh
 }
 
 /* ── Light rig shared by all scenes ── */
-function Scene({ ModelComponent, detectedClass, onPhaseChange }) {
+function ShadowedModel({ children }) {
+  const groupRef = useRef(null);
+
+  useEffect(() => {
+    if (!groupRef.current) return;
+    groupRef.current.traverse((node) => {
+      if (node.isMesh) {
+        node.castShadow = true;
+        node.receiveShadow = true;
+      }
+    });
+  }, [children]);
+
+  return <group ref={groupRef}>{children}</group>;
+}
+
+
+
+function AnimatedArrow() {
+  const arrowRef = useRef(null);
+  const pulseRef = useRef(null);
+
+  useFrame(({ clock }) => {
+    const time = clock.elapsedTime;
+    if (arrowRef.current) {
+      arrowRef.current.position.x = Math.sin(time * 2.8) * 0.08;
+      arrowRef.current.rotation.y = Math.sin(time * 1.6) * 0.08;
+    }
+    if (pulseRef.current) {
+      const scale = 1 + Math.sin(time * 3.2) * 0.14;
+      pulseRef.current.scale.set(scale, scale, scale);
+    }
+  });
+
+  return (
+    <group ref={arrowRef} position={[0, 0.05, 0]} rotation={[0, 0, -Math.PI / 2]}>
+      <mesh castShadow>
+        <cylinderGeometry args={[0.055, 0.055, 0.9, 24]} />
+        <meshStandardMaterial color="#22c55e" emissive="#16a34a" emissiveIntensity={0.45} roughness={0.22} metalness={0.25} />
+      </mesh>
+      <mesh position={[0, 0.58, 0]} castShadow>
+        <coneGeometry args={[0.18, 0.34, 32]} />
+        <meshStandardMaterial color="#bbf7d0" emissive="#22c55e" emissiveIntensity={0.8} roughness={0.18} metalness={0.2} />
+      </mesh>
+      <mesh ref={pulseRef} position={[0, 0.04, 0]}>
+        <torusGeometry args={[0.34, 0.012, 8, 72]} />
+        <meshBasicMaterial color="#86efac" transparent opacity={0.38} />
+      </mesh>
+    </group>
+  );
+}
+
+function Scene({ ResultModel, detectedClass, selected }) {
   return (
     <>
-      <ambientLight intensity={0.8} />
-      <directionalLight position={[5, 8, 5]} intensity={1.5} castShadow />
-      <directionalLight position={[-5, 5, -5]} intensity={0.5} />
-      <Environment preset="city" />
-      <OrbitControls enableZoom={true} enablePan={false} autoRotate={false} maxPolarAngle={Math.PI / 1.8} />
-      <Float speed={2} rotationIntensity={0.2} floatIntensity={0.4}>
-        <TransformationWrapper ModelComponent={ModelComponent} detectedClass={detectedClass} onPhaseChange={onPhaseChange} />
-      </Float>
+      {/* Realistic indoor room lighting — no neon/fantasy colors */}
+      <ambientLight intensity={0.6} />
+      <hemisphereLight args={['#ffffff', '#e0d8cc', 0.55]} />
+      {/* Key light: upper front-left, warm daylight */}
+      <directionalLight
+        position={[-3, 5, 4]}
+        intensity={1.2}
+        castShadow
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+        shadow-camera-near={0.5}
+        shadow-camera-far={20}
+        shadow-camera-left={-4}
+        shadow-camera-right={4}
+        shadow-camera-top={4}
+        shadow-camera-bottom={-4}
+        shadow-bias={-0.001}
+      />
+      {/* Soft fill light from the right */}
+      <directionalLight position={[4, 3, -2]} intensity={0.35} color="#fff8f0" />
+      <OrbitControls
+        enableZoom
+        enablePan={false}
+        autoRotate={false}
+        minDistance={3.2}
+        maxDistance={8.5}
+        maxPolarAngle={Math.PI / 1.75}
+      />
+      {/* Invisible shadow-receiving table plane at y=0 */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
+        <planeGeometry args={[10, 10]} />
+        <shadowMaterial transparent opacity={0.0} />
+      </mesh>
+      {!selected && (
+        <group position={[0, 0, 0]} scale={1.1}>
+          <ShadowedModel>
+            <RawModel detectedClass={detectedClass} />
+          </ShadowedModel>
+        </group>
+      )}
+      {selected && (
+        <>
+          <group position={[-1.18, 0, 0]} scale={0.82}>
+            <ShadowedModel>
+              <RawModel detectedClass={detectedClass} />
+            </ShadowedModel>
+          </group>
+          <AnimatedArrow />
+          <group position={[1.18, 0, 0]} scale={0.82}>
+            <ShadowedModel>
+              <ResultModel />
+            </ShadowedModel>
+          </group>
+        </>
+      )}
+      {/* Soft contact shadow on the table surface */}
+      <ContactShadows
+        position={[0, 0, 0]}
+        opacity={0.45}
+        scale={5}
+        blur={2.0}
+        far={2.5}
+        color="#3a2a1a"
+      />
     </>
   );
 }
@@ -330,24 +449,22 @@ const getClassIcon = (cls) => {
 };
 
 const ARScreen = ({ detectionData, onBack, onViewSteps, onSave, isSaved }) => {
-  const [activeIdea, setActiveIdea] = useState(0);
-  const [transformationPhase, setTransformationPhase] = useState('Recognized Object');
+  const [selectedIdeaIndex, setSelectedIdeaIndex] = useState(null);
 
   if (!detectionData) return null;
   const { detection, ideas, imageSrc } = detectionData;
-  const idea = ideas?.ideas?.[activeIdea];
+  const selectedIdea = selectedIdeaIndex !== null ? ideas?.ideas?.[selectedIdeaIndex] : null;
 
-  // Pick 3D model: idea-specific first, then category fallback
   const detectedClass = detection?.class?.toLowerCase() || '';
-  const ModelComponent =
-    IDEA_MODEL_MAP[idea?.id] ||
+  const ResultModel =
+    IDEA_MODEL_MAP[selectedIdea?.id] ||
     MODEL_MAP[detectedClass] ||
     MODEL_MAP.default;
 
   const handleShare = async () => {
     const shareData = {
       title: 'Trash2Treasure Idea',
-      text: `Check out this upcycling idea: ${idea?.title}!`,
+      text: `Check out this upcycling idea: ${selectedIdea?.title || ideas?.label || detection?.class}!`,
       url: window.location.href,
     };
     if (navigator.share) {
@@ -358,12 +475,19 @@ const ARScreen = ({ detectionData, onBack, onViewSteps, onSave, isSaved }) => {
   };
 
   return (
-    <div className="ar-screen">
+    <div className={`ar-screen ${imageSrc ? 'ar-screen--snapshot' : ''}`}>
+      {imageSrc && (
+        <div
+          className="ar-environment-snapshot"
+          style={{ backgroundImage: `url(${imageSrc})` }}
+          aria-hidden="true"
+        />
+      )}
       {/* ── AR Canvas Viewport ── */}
       <div className="ar-canvas-wrapper">
         <AnimatePresence mode="wait">
           <motion.div
-            key={idea?.id || detectedClass}
+            key={`${selectedIdea?.id || 'source'}-${detectedClass}`}
             style={{ width: '100%', height: '100%' }}
             initial={{ opacity: 0, scale: 0.88, rotateY: -15 }}
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
@@ -371,32 +495,26 @@ const ARScreen = ({ detectionData, onBack, onViewSteps, onSave, isSaved }) => {
             transition={{ duration: 0.3, ease: 'easeOut' }}
           >
             <Canvas
-              camera={{ position: [0, 1.5, 4.5], fov: 48 }}
+              camera={{ position: [0, 1.15, 5.2], fov: 42 }}
               shadows
-              gl={{ antialias: true, alpha: true }}
+              gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+              dpr={[1, 2]}
               style={{ background: 'transparent' }}
+              onCreated={({ gl }) => {
+                gl.toneMapping = THREE.ACESFilmicToneMapping;
+                gl.toneMappingExposure = 1.16;
+                gl.shadowMap.enabled = true;
+                gl.shadowMap.type = THREE.PCFSoftShadowMap;
+                if (THREE.SRGBColorSpace) gl.outputColorSpace = THREE.SRGBColorSpace;
+              }}
             >
-              <Scene ModelComponent={ModelComponent} detectedClass={detectedClass} onPhaseChange={setTransformationPhase} />
+              <Scene ResultModel={ResultModel} detectedClass={detectedClass} selected={Boolean(selectedIdea)} />
             </Canvas>
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* ── Transformation Phase Indicator ── */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={transformationPhase}
-          className="ar-phase-indicator"
-          initial={{ opacity: 0, y: -20, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.9 }}
-          transition={{ type: 'spring', damping: 15 }}
-        >
-          <SparklesIcon size={18} className="text-yellow-400" />
-          <span>{transformationPhase}</span>
-        </motion.div>
-      </AnimatePresence>
-
       {/* ── Detection Badge (top-left) ── */}
       <motion.div
         className="ar-label-badge"
@@ -442,15 +560,20 @@ const ARScreen = ({ detectionData, onBack, onViewSteps, onSave, isSaved }) => {
       >
         <div className="ar-sheet-handle" />
 
+        <div className="ar-recommendation-head">
+          <p className="ar-recommendation-title">Possible recyclable ideas</p>
+          <p className="ar-recommendation-sub">{ideas?.label || detection?.class}</p>
+        </div>
+
         {/* Idea Tabs */}
         {ideas?.ideas?.length > 1 && (
           <div className="ar-tabs-container">
             {ideas.ideas.map((tab, idx) => (
               <motion.button
                 key={tab.id}
-                className={`ar-tab ${activeIdea === idx ? 'active' : ''}`}
+                className={`ar-tab ${selectedIdeaIndex === idx ? 'active' : ''}`}
                 id={`btn-idea-tab-${idx}`}
-                onClick={() => setActiveIdea(idx)}
+                onClick={() => setSelectedIdeaIndex(idx)}
                 whileTap={{ scale: 0.96 }}
               >
                 {tab.title}
@@ -461,51 +584,61 @@ const ARScreen = ({ detectionData, onBack, onViewSteps, onSave, isSaved }) => {
 
         <AnimatePresence mode="wait">
           <motion.div
-            key={idea?.id}
+            key={selectedIdea?.id || 'recommendations'}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.2 }}
             className="ar-idea-content"
           >
-            {/* Idea Header */}
-            <div className="ar-idea-header">
-              <h1 className="ar-idea-title">{idea?.title}</h1>
-              <div className="ar-idea-meta">
-                <span className={`badge badge-${idea?.difficulty?.toLowerCase()}`}>
-                  {idea?.difficulty}
-                </span>
-                <span className="badge badge-muted">⏱ {idea?.time}</span>
-                <span className="badge badge-green">Impact: {idea?.impact}</span>
+            {selectedIdea ? (
+              <>
+                <div className="ar-idea-header">
+                  <h1 className="ar-idea-title">{selectedIdea.title}</h1>
+                  <div className="ar-idea-meta">
+                    <span className={`badge badge-${selectedIdea.difficulty?.toLowerCase()}`}>
+                      {selectedIdea.difficulty}
+                    </span>
+                    <span className="badge badge-muted">{selectedIdea.time}</span>
+                    <span className="badge badge-green">Impact: {selectedIdea.impact}</span>
+                  </div>
+                </div>
+
+                <p className="ar-idea-desc">{selectedIdea.description}</p>
+
+                <div className="ar-idea-actions">
+                  <motion.button
+                    className="btn btn-primary"
+                    style={{ flex: 1 }}
+                    id="btn-view-steps"
+                    onClick={() => onViewSteps({ idea: selectedIdea, imageSrc, objectData: { label: ideas?.label } })}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    View Steps <ChevronRight size={16} />
+                  </motion.button>
+
+                  <motion.button
+                    className={`btn-icon ${isSaved(selectedIdea.id) ? 'saved' : ''}`}
+                    id="btn-save-idea"
+                    onClick={() => onSave(selectedIdea, { label: ideas?.label })}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.9 }}
+                    aria-label="Save idea"
+                  >
+                    <Star size={18} fill={isSaved(selectedIdea.id) ? 'currentColor' : 'none'} />
+                  </motion.button>
+                </div>
+              </>
+            ) : (
+              <div className="ar-idea-empty">
+                <span className="ar-idea-empty-icon">{getClassIcon(detection?.class)}</span>
+                <div>
+                  <h1 className="ar-idea-title">Choose a recommendation</h1>
+                  <p className="ar-idea-desc">The scanned object is placed on the table surface. Select an option to preview the upcycled 3D transformation.</p>
+                </div>
               </div>
-            </div>
-
-            <p className="ar-idea-desc">{idea?.description}</p>
-
-            {/* Actions */}
-            <div className="ar-idea-actions">
-              <motion.button
-                className="btn btn-primary"
-                style={{ flex: 1 }}
-                id="btn-view-steps"
-                onClick={() => onViewSteps({ idea, imageSrc, objectData: { label: ideas?.label } })}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                View Steps <ChevronRight size={16} />
-              </motion.button>
-
-              <motion.button
-                className={`btn-icon ${isSaved(idea?.id) ? 'saved' : ''}`}
-                id="btn-save-idea"
-                onClick={() => onSave(idea, { label: ideas?.label })}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.9 }}
-                aria-label="Save idea"
-              >
-                <Star size={18} fill={isSaved(idea?.id) ? 'currentColor' : 'none'} />
-              </motion.button>
-            </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </motion.div>

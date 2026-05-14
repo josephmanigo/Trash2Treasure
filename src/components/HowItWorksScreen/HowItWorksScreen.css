@@ -263,7 +263,7 @@
   width: 100%;
 }
 
-@media (max-width: 430px) {
+@media (max-width: 899px) {
   .how-screen,
   .how-content,
   .how-hero,
@@ -285,7 +285,7 @@
   }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 99999px) {
   .how-header {
     padding: 32px clamp(32px, 5vw, 72px) 24px;
   }

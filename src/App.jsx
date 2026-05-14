@@ -180,6 +180,14 @@ function App() {
         );
 
       case SCREENS.AR:
+        if (!detectionData) {
+          return (
+            <motion.div key="scanner-fallback" className="screen-wrapper" variants={slideUpVariants} initial="initial" animate="in" exit="out" transition={pageTransition}>
+              <ScannerScreen onBack={() => navigate(SCREENS.HOME)} onDetect={handleDetect} />
+            </motion.div>
+          );
+        }
+
         return (
           <motion.div key="ar" className="screen-wrapper" variants={slideUpVariants} initial="initial" animate="in" exit="out" transition={pageTransition}>
             <ARScreen detectionData={detectionData} onBack={() => navigate(SCREENS.SCANNER)} onViewSteps={handleViewSteps} onSave={handleSave} isSaved={isIdeaSaved} />
@@ -221,14 +229,32 @@ function App() {
 
   return (
     <div className="app-root">
-      <div className="app-container">
-        <AnimatePresence mode="wait">
-          {renderScreen()}
-        </AnimatePresence>
+      {/* ── Phone frame (desktop only — CSS hides it on mobile) ── */}
+      <div className="phone-frame">
+        {/* Dynamic Island / Notch */}
+        <div className="phone-notch" />
 
-        <AnimatePresence>
-          {toast && <Toast message={toast} />}
-        </AnimatePresence>
+        {/* Hardware buttons */}
+        <div className="phone-btn-silent" />
+        <div className="phone-btn-vol-up" />
+        <div className="phone-btn-vol-down" />
+        <div className="phone-btn-power" />
+
+        {/* Screen glass */}
+        <div className="phone-screen-inner">
+          <div className="app-container">
+            <AnimatePresence mode="wait">
+              {renderScreen()}
+            </AnimatePresence>
+
+            <AnimatePresence>
+              {toast && <Toast message={toast} />}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Home indicator bar */}
+        <div className="phone-home-bar" />
       </div>
     </div>
   );
