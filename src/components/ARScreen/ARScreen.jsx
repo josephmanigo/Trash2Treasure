@@ -11,8 +11,9 @@ export const RawModel = ({ detectedClass }) => {
   const cls = (detectedClass || '').toLowerCase();
   
   if (['bottle', 'wine glass', 'vase'].includes(cls)) {
+    // Bottle: total height ~1.13 units, bottom at y=0
     return (
-      <group position={[0, -0.4, 0]}>
+      <group position={[0, 0, 0]}>
         <mesh position={[0, 0.4, 0]}>
           <cylinderGeometry args={[0.25, 0.25, 0.8, 24]} />
           <meshPhysicalMaterial color="#4ade80" transmission={0.9} opacity={1} transparent roughness={0.1} thickness={0.1} ior={1.5} />
@@ -38,8 +39,9 @@ export const RawModel = ({ detectedClass }) => {
   }
   
   if (['cup', 'bowl'].includes(cls)) {
+    // Cup: height 0.6, bottom at y=0
     return (
-      <group position={[0, -0.2, 0]}>
+      <group position={[0, 0, 0]}>
         <mesh position={[0, 0.3, 0]}>
           <cylinderGeometry args={[0.28, 0.22, 0.6, 24]} />
           <meshStandardMaterial color="#f3f4f6" roughness={0.9} />
@@ -57,8 +59,9 @@ export const RawModel = ({ detectedClass }) => {
   }
   
   if (['book', 'cardboard', 'paper'].includes(cls)) {
+    // Book: height 0.6, bottom at y=0
     return (
-      <group position={[0, -0.2, 0]}>
+      <group position={[0, 0, 0]}>
         <mesh position={[0, 0.3, 0]}>
           <boxGeometry args={[0.7, 0.6, 0.5]} />
           <meshStandardMaterial color="#d4a574" roughness={0.9} />
@@ -80,8 +83,9 @@ export const RawModel = ({ detectedClass }) => {
   }
 
   if (['scissors', 'knife', 'fork', 'spoon', 'toothbrush', 'can', 'tin', 'metal'].includes(cls) || cls.includes('can')) {
+    // Can: height 0.7, bottom at y=0
     return (
-      <group position={[0, -0.2, 0]}>
+      <group position={[0, 0, 0]}>
         <mesh position={[0, 0.35, 0]}>
           <cylinderGeometry args={[0.22, 0.22, 0.7, 32]} />
           <meshStandardMaterial color="#ef4444" metalness={0.6} roughness={0.2} />
@@ -103,8 +107,9 @@ export const RawModel = ({ detectedClass }) => {
   }
 
   if (['cell phone', 'laptop', 'keyboard', 'mouse', 'remote', 'tv', 'clock', 'hair drier'].includes(cls)) {
+    // Phone standing: rotate slightly, base at y=0
     return (
-      <group position={[0, -0.2, 0]} rotation={[0.4, 0, 0]}>
+      <group position={[0, 0, 0]} rotation={[0.4, 0, 0]}>
         <mesh position={[0, 0.4, 0]}>
           <boxGeometry args={[0.4, 0.8, 0.04]} />
           <meshStandardMaterial color="#1f2937" metalness={0.8} roughness={0.2} />
@@ -124,8 +129,9 @@ export const RawModel = ({ detectedClass }) => {
   }
 
   if (['banana', 'apple', 'orange', 'broccoli', 'carrot', 'sandwich', 'hot dog', 'pizza', 'donut', 'cake', 'potted plant'].includes(cls)) {
+    // Fruit: sphere r=0.15, centre at y=0.15, base at y=0
     return (
-      <group position={[0, -0.1, 0]}>
+      <group position={[0, 0, 0]}>
         <mesh position={[-0.15, 0.15, 0]}>
           <sphereGeometry args={[0.15, 24, 24]} />
           <meshStandardMaterial color="#ef4444" roughness={0.4} />
@@ -143,8 +149,9 @@ export const RawModel = ({ detectedClass }) => {
   }
 
   if (['person', 'backpack', 'handbag', 'suitcase', 'umbrella', 'tie'].includes(cls)) {
+    // Bag: height 0.1, bottom at y=0
     return (
-      <group position={[0, -0.2, 0]}>
+      <group position={[0, 0, 0]}>
         <mesh position={[0, 0.05, 0]}>
           <boxGeometry args={[0.6, 0.1, 0.5]} />
           <meshStandardMaterial color="#3b82f6" roughness={0.9} />
@@ -158,8 +165,9 @@ export const RawModel = ({ detectedClass }) => {
   }
 
   if (['teddy bear', 'frisbee', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket'].includes(cls)) {
+    // Ball: r=0.2, centre at y=0.2, base at y=0
     return (
-      <group position={[0, -0.2, 0]}>
+      <group position={[0, 0, 0]}>
         <mesh position={[0, 0.2, 0]}>
           <sphereGeometry args={[0.2, 24, 24]} />
           <meshStandardMaterial color="#f97316" roughness={0.8} />
@@ -177,8 +185,9 @@ export const RawModel = ({ detectedClass }) => {
   }
   
   if (['chair', 'couch', 'bed', 'dining table', 'bench', 'furniture'].includes(cls)) {
+    // Chair: legs at y=0, seat disc at y=0.5
     return (
-      <group position={[0, -0.4, 0]}>
+      <group position={[0, 0, 0]}>
         <mesh position={[0, 0.5, 0]}>
           <cylinderGeometry args={[0.35, 0.35, 0.06, 24]} />
           <meshStandardMaterial color="#b45309" roughness={0.8} />
@@ -363,41 +372,45 @@ function AnimatedArrow() {
 function Scene({ ResultModel, detectedClass, selected }) {
   return (
     <>
-      {/* Realistic indoor room lighting — no neon/fantasy colors */}
-      <ambientLight intensity={0.6} />
-      <hemisphereLight args={['#ffffff', '#e0d8cc', 0.55]} />
-      {/* Key light: upper front-left, warm daylight */}
+      {/* ── Realistic soft indoor lighting ── */}
+      <ambientLight intensity={0.55} />
+      <hemisphereLight args={['#ffffff', '#d8d0c4', 0.7]} />
+      {/* Key light: upper-left, warm daylight, casts shadows */}
       <directionalLight
         position={[-3, 5, 4]}
         intensity={1.2}
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
-        shadow-camera-near={0.5}
+        shadow-camera-near={0.1}
         shadow-camera-far={20}
-        shadow-camera-left={-4}
-        shadow-camera-right={4}
-        shadow-camera-top={4}
-        shadow-camera-bottom={-4}
-        shadow-bias={-0.001}
+        shadow-camera-left={-5}
+        shadow-camera-right={5}
+        shadow-camera-top={5}
+        shadow-camera-bottom={-5}
+        shadow-bias={-0.002}
       />
-      {/* Soft fill light from the right */}
-      <directionalLight position={[4, 3, -2]} intensity={0.35} color="#fff8f0" />
+      {/* Soft fill from the right */}
+      <directionalLight position={[4, 3, -2]} intensity={0.32} color="#fff8f0" />
+
       <OrbitControls
         enableZoom
         enablePan={false}
         autoRotate={false}
-        minDistance={3.2}
-        maxDistance={8.5}
-        maxPolarAngle={Math.PI / 1.75}
+        minDistance={2.5}
+        maxDistance={7.0}
+        maxPolarAngle={Math.PI / 2.1}
       />
-      {/* Invisible shadow-receiving table plane at y=0 */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
-        <planeGeometry args={[10, 10]} />
-        <shadowMaterial transparent opacity={0.0} />
+
+      {/* ── Shadow-receiving ground plane at y=0 ── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.001, 0]} receiveShadow>
+        <planeGeometry args={[12, 12]} />
+        <shadowMaterial transparent opacity={0.28} />
       </mesh>
+
+      {/* ── Models ── */}
       {!selected && (
-        <group position={[0, 0, 0]} scale={1.1}>
+        <group position={[0, 0, 0]} scale={1.05}>
           <ShadowedModel>
             <RawModel detectedClass={detectedClass} />
           </ShadowedModel>
@@ -405,27 +418,28 @@ function Scene({ ResultModel, detectedClass, selected }) {
       )}
       {selected && (
         <>
-          <group position={[-1.18, 0, 0]} scale={0.82}>
+          <group position={[-1.25, 0, 0]} scale={0.78}>
             <ShadowedModel>
               <RawModel detectedClass={detectedClass} />
             </ShadowedModel>
           </group>
           <AnimatedArrow />
-          <group position={[1.18, 0, 0]} scale={0.82}>
+          <group position={[1.25, 0, 0]} scale={0.78}>
             <ShadowedModel>
               <ResultModel />
             </ShadowedModel>
           </group>
         </>
       )}
-      {/* Soft contact shadow on the table surface */}
+
+      {/* ── Soft contact shadow blob directly under objects ── */}
       <ContactShadows
-        position={[0, 0, 0]}
-        opacity={0.45}
-        scale={5}
-        blur={2.0}
-        far={2.5}
-        color="#3a2a1a"
+        position={[0, 0.002, 0]}
+        opacity={0.42}
+        scale={6}
+        blur={2.2}
+        far={2.0}
+        color="#2a1a0a"
       />
     </>
   );
@@ -495,14 +509,14 @@ const ARScreen = ({ detectionData, onBack, onViewSteps, onSave, isSaved }) => {
             transition={{ duration: 0.3, ease: 'easeOut' }}
           >
             <Canvas
-              camera={{ position: [0, 1.15, 5.2], fov: 42 }}
+              camera={{ position: [0, 1.4, 5.8], fov: 40 }}
               shadows
               gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
               dpr={[1, 2]}
               style={{ background: 'transparent' }}
               onCreated={({ gl }) => {
                 gl.toneMapping = THREE.ACESFilmicToneMapping;
-                gl.toneMappingExposure = 1.16;
+                gl.toneMappingExposure = 1.1;
                 gl.shadowMap.enabled = true;
                 gl.shadowMap.type = THREE.PCFSoftShadowMap;
                 if (THREE.SRGBColorSpace) gl.outputColorSpace = THREE.SRGBColorSpace;
