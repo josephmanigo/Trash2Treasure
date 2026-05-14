@@ -147,8 +147,8 @@ export function SeedlingModel() {
   const h = 0.95;
   const cupColors = ['#60a5fa', '#f59e0b', '#f472b6', '#a78bfa', '#4ade80'];
   return (
-    <group ref={g} position={[0, 0, 0]}>
-      {/* Tray sits at y=0 */}}
+    <group ref={g} position={[0, 0.08, 0]}>
+      {/* Tray sits at y=0 */}
       <mesh position={[0, -0.05, -0.05]}>
         <boxGeometry args={[1.4, 0.06, 0.8]} />
         <meshStandardMaterial color="#374151" roughness={0.4} metalness={0.2} />
@@ -257,8 +257,8 @@ export function PencilHolderModel() {
     { a: 288, color: '#a78bfa' },
   ];
   return (
-    <group ref={g} position={[0, 0, 0]}>
-      {/* Can body — base at y=0, top at y=0.735 */}}
+    <group ref={g} position={[0, 0.13, 0]}>
+      {/* Can body — base at y=0, top at y=0.735 */}
       <mesh position={[0, 0.3, 0]}>
         <cylinderGeometry args={[0.48, 0.46, 0.85, 20, 1, true]} />
         <meshStandardMaterial color="#9CA3AF" metalness={0.85} roughness={0.12} side={THREE.DoubleSide} />
@@ -324,8 +324,8 @@ export function CompostBinModel() {
     if (steam2.current) steam2.current.position.y = 1.3 + ((clock.elapsedTime * 0.6 + 0.25) % 0.5);
   });
   return (
-    <group ref={g} position={[0, 0, 0]}>
-      {/* Body: bottom at y=-0.3-0.65=-0.95, shift up so barrel bottom at y=0 */}}
+    <group ref={g} position={[0, 0.25, 0]}>
+      {/* Body: bottom at y=-0.3-0.65=-0.95, shift up so barrel bottom at y=0 */}
       <mesh position={[0, 0.4, 0]}>
         <cylinderGeometry args={[0.7, 0.85, 1.3, 18]} />
         <meshStandardMaterial color="#1F2937" roughness={0.5} />
@@ -426,8 +426,8 @@ export function SeedBombModel() {
   });
   const colors = ['#78350f', '#92400e', '#713f12', '#854d0e', '#a16207'];
   return (
-    <group ref={g} position={[0, 0, 0]}>
-      {/* Tray sits at y=0 */}}
+    <group ref={g} position={[0, 0.14, 0]}>
+      {/* Tray sits at y=0 */}
       <mesh position={[0, -0.1, 0]}><boxGeometry args={[1.4, 0.08, 1.0]} /><meshStandardMaterial color="#d4a574" roughness={0.8} /></mesh>
       {/* Seed bombs in a cluster */}
       {[[-0.35, 0, -0.2], [0, 0, 0.15], [0.35, 0, -0.1], [-0.15, 0, 0.3], [0.2, 0, 0.3], [0.0, 0.22, 0.05], [-0.2, 0.22, -0.1]].map(([x, y, z], i) => (
@@ -456,8 +456,8 @@ export function PlanterBoxModel() {
   const g = useRef();
   useFrame(({ clock }) => { if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.22) * 0.1; });
   return (
-    <group ref={g} position={[0, 0, 0]}>
-      {/* Planter box: bottom at y=-0.25, shift group up so legs at y=0 */}}
+    <group ref={g} position={[0, 0.58, 0]}>
+      {/* Planter box: bottom at y=-0.25, shift group up so legs at y=0 */}
       <mesh position={[0, 0, 0]}><boxGeometry args={[1.2, 0.5, 0.7]} /><meshStandardMaterial color="#92400e" roughness={0.75} /></mesh>
       {/* Drawer face detail */}
       <mesh position={[0, 0, 0.36]}><boxGeometry args={[1.1, 0.4, 0.02]} /><meshStandardMaterial color="#78350f" roughness={0.7} /></mesh>
@@ -494,7 +494,7 @@ export function DonateBoxModel() {
   useFrame(({ clock }) => { if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.24) * 0.1; });
   return (
     <group ref={g} position={[0, 0, 0]}>
-      {/* Box — base at y=-0.45, shift up so base at y=0 */}}
+      {/* Box — base at y=-0.45, shift up so base at y=0 */}
       <mesh position={[0, 0.35, 0]}><boxGeometry args={[1.1, 0.8, 0.8]} /><meshStandardMaterial color="#7c3aed" roughness={0.5} /></mesh>
       {/* Box flaps */}
       <mesh position={[-0.28, 0.8, 0]} rotation={[0, 0, -0.3]}><boxGeometry args={[0.55, 0.06, 0.78]} /><meshStandardMaterial color="#6d28d9" roughness={0.5} /></mesh>
@@ -524,8 +524,8 @@ export function SteampunkArtModel() {
     if (gear2.current) gear2.current.rotation.z = -clock.elapsedTime * 1.2;
   });
   return (
-    <group ref={g} position={[0, 0, 0]}>
-      {/* Wood base at y=0, post goes up */}}
+    <group ref={g} position={[0, 0.36, 0]}>
+      {/* Wood base at y=0, post goes up */}
       <mesh position={[0, -0.3, 0]}><cylinderGeometry args={[0.7, 0.75, 0.12, 20]} /><meshStandardMaterial color="#92400e" roughness={0.8} /></mesh>
       {/* Central post */}
       <mesh position={[0, 0.2, 0]}><cylinderGeometry args={[0.06, 0.08, 0.9, 8]} /><meshStandardMaterial color="#d4a574" roughness={0.4} metalness={0.6} /></mesh>
@@ -557,8 +557,8 @@ export function DigitalFrameModel() {
   const g = useRef();
   useFrame(({ clock }) => { if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.2) * 0.1; });
   return (
-    <group ref={g} position={[0, 0, 0]}>
-      {/* Frame border — base at y=-0.5 → shift group +0.5 */}}
+    <group ref={g} position={[0, 0.58, 0]}>
+      {/* Frame border — base at y=-0.5 → shift group +0.5 */}
       <mesh><boxGeometry args={[1.3, 1.0, 0.08]} /><meshStandardMaterial color="#1f2937" roughness={0.3} metalness={0.4} /></mesh>
       {/* Screen */}
       <mesh position={[0, 0, 0.041]}><boxGeometry args={[1.1, 0.8, 0.01]} /><meshStandardMaterial color="#bfdbfe" emissive="#93c5fd" emissiveIntensity={0.3} roughness={0.1} /></mesh>

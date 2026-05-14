@@ -135,21 +135,19 @@ function App() {
     showToast('Idea removed');
   }, [removeIdea, showToast]);
 
-  // Show loading while checking session
-  if (loading) {
-    return (
-      <div className="app-root">
-        <div className="app-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="splash-logo" style={{ width: 80, height: 80 }}>
-            <img src="/icon.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // The loading screen is now rendered inside the phone wrapper
 
   // Render active screen
   const renderScreen = () => {
+    if (loading) {
+      return (
+        <motion.div key="loading" className="screen-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }} initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+          <div className="splash-logo" style={{ width: 80, height: 80 }}>
+            <img src="/icon.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          </div>
+        </motion.div>
+      );
+    }
     switch (screen) {
       case SCREENS.LOGIN:
         return (

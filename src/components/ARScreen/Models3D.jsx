@@ -13,7 +13,7 @@ export function PlantPotModel() {
     }
   });
   return (
-    <group ref={g} position={[0, 0, 0]}>
+    <group ref={g} position={[0, 1.19, 0]}>
       {/* Pot body */}
       <mesh position={[0, 0.65, 0]} castShadow>
         <cylinderGeometry args={[0.62, 0.46, 1.3, 20]} />
@@ -74,7 +74,7 @@ export function OrganizerModel() {
   ];
   const pencilColors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff9f43'];
   return (
-    <group ref={g} position={[0, 0.1, 0]}>
+    <group ref={g} position={[0, 0, 0]}>
       {/* Base plate */}
       <mesh position={[0, -0.05, 0]}>
         <boxGeometry args={[1.6, 0.1, 0.7]} />
@@ -190,7 +190,7 @@ export function CircuitBoardModel() {
     { x: 0.3,  z: 0.1, w: 0.5, d: 0.04 },
   ];
   return (
-    <group ref={g} position={[0, 0.04, 0]}>
+    <group ref={g} position={[0, 1.21, 0]}>
       {/* PCB board */}
       <mesh position={[0, 0, 0]}>
         <boxGeometry args={[1.4, 0.08, 1.1]} />
@@ -268,8 +268,8 @@ export function TinLanternModel() {
     }
   }
   return (
-    <group ref={g} position={[0, 0, 0]}>
-      {/* Can body shell — bottom cap at y=0, top cap at y=1.4, centre at y=0.7 */}}
+    <group ref={g} position={[0, 0.73, 0]}>
+      {/* Can body shell — bottom cap at y=0, top cap at y=1.4, centre at y=0.7 */}
       <mesh position={[0, 0, 0]}>
         <cylinderGeometry args={[0.52, 0.52, 1.4, 24, 1, true]} />
         <meshStandardMaterial color="#9CA3AF" metalness={0.8} roughness={0.15} side={THREE.DoubleSide} />
@@ -330,7 +330,7 @@ export function ToteBagModel() {
     }
   });
   return (
-    <group ref={g} position={[0, -0.1, 0]}>
+    <group ref={g} position={[0, 0.56, 0]}>
       {/* Bag body front */}
       <mesh position={[0, 0, 0.03]}>
         <boxGeometry args={[1.0, 1.25, 0.06]} />
@@ -424,8 +424,8 @@ export function GlassTerrariumModel() {
   const g = useRef();
   useFrame(({ clock }) => { if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.24) * 0.1; });
   return (
-    <group ref={g} position={[0, 0, 0]}>
-      {/* Glass jar — bottom at y=0, top at y=1.6, centre at y=0.8 */}}
+    <group ref={g} position={[0, 0.83, 0]}>
+      {/* Glass jar — bottom at y=0, top at y=1.6, centre at y=0.8 */}
       <mesh><cylinderGeometry args={[0.6, 0.5, 1.6, 24, 1, true]} /><meshPhysicalMaterial color="#b0e0e6" roughness={0.05} metalness={0.1} transparent opacity={0.35} side={THREE.DoubleSide} /></mesh>
       {/* Glass bottom */}
       <mesh position={[0, -0.8, 0]}><cylinderGeometry args={[0.5, 0.5, 0.06, 24]} /><meshPhysicalMaterial color="#a8d8ea" roughness={0.1} transparent opacity={0.5} /></mesh>
@@ -474,8 +474,8 @@ export function OrganicCompostModel() {
     if (leaf1.current) leaf1.current.rotation.z = Math.sin(clock.elapsedTime * 2) * 0.15;
   });
   return (
-    <group ref={g} position={[0, 0, 0]}>
-      {/* Barrel body — bottom at y=-0.2, shift up: legs reach y=0 */}}
+    <group ref={g} position={[0, 0.6, 0]}>
+      {/* Barrel body — bottom at y=-0.2, shift up: legs reach y=0 */}
       <mesh position={[0, 0.4, 0]}><cylinderGeometry args={[0.65, 0.65, 1.2, 20]} /><meshStandardMaterial color="#365314" roughness={0.5} /></mesh>
       {/* Barrel bands */}
       {[0.0, 0.4, 0.8].map((y, i) => (<mesh key={i} position={[0, y, 0]}><torusGeometry args={[0.66, 0.03, 8, 24]} /><meshStandardMaterial color="#854d0e" roughness={0.4} metalness={0.3} /></mesh>))}
@@ -516,8 +516,8 @@ export function FurnitureShelfModel() {
   useFrame(({ clock }) => { if (g.current) g.current.rotation.y = Math.sin(clock.elapsedTime * 0.22) * 0.1; });
   const bookColors = ['#ef4444','#3b82f6','#eab308','#22c55e','#a855f7','#ec4899','#f97316','#06b6d4'];
   return (
-    <group ref={g} position={[0, 0, 0]}>
-      {/* Side panels — bottom at y=-0.4 inside, shift group up */}}
+    <group ref={g} position={[0, 0.33, 0]}>
+      {/* Side panels — bottom at y=-0.4 inside, shift group up */}
       <mesh position={[-0.65, 0.5, 0]}><boxGeometry args={[0.06, 1.8, 0.7]} /><meshStandardMaterial color="#92400e" roughness={0.7} /></mesh>
       <mesh position={[0.65, 0.5, 0]}><boxGeometry args={[0.06, 1.8, 0.7]} /><meshStandardMaterial color="#92400e" roughness={0.7} /></mesh>
       {/* Shelves */}
@@ -588,7 +588,7 @@ export function ApplianceModel() {
     if (gear.current) gear.current.rotation.z = clock.elapsedTime * 1.5;
   });
   return (
-    <group ref={g} position={[0, 0, 0]}>
+    <group ref={g} position={[0, 0.35, 0]}>
       {/* Appliance body — bottom at y=-0.25, shift up to y=0 */}
       <mesh position={[0, 0.2, 0]}><boxGeometry args={[1.3, 0.9, 0.85]} /><meshStandardMaterial color="#374151" roughness={0.3} metalness={0.5} /></mesh>
       {/* Door/window */}

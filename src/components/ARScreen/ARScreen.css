@@ -20,9 +20,9 @@
   z-index: 0;
   background-position: center;
   background-size: cover;
-  /* Show the real room clearly — no heavy dark filter */
-  filter: saturate(1.05) contrast(1.02) brightness(0.88);
-  opacity: 0.92;
+  /* Show the real room clearly — camera image dominates */
+  filter: saturate(1.02) contrast(1.01) brightness(0.94);
+  opacity: 1;
   transform: scale(1.01);
 }
 

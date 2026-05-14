@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, Camera, Sparkles, Layers, BookOpen, Brain, Star, Save, Recycle, Package, CupSoda, Smartphone, Scissors, Shirt } from 'lucide-react';
+import { ArrowLeft, Camera, Sparkles, Layers, BookOpen, Brain, Star, Save, Recycle, BottleWine, CupSoda, Smartphone, Scissors, Shirt } from 'lucide-react';
 import './HowItWorksScreen.css';
 
 const steps = [
@@ -51,7 +51,7 @@ const steps = [
 ];
 
 const detectedItems = [
-  { icon: Package, label: 'Bottle', result: 'Plant Pot' },
+  { icon: BottleWine, label: 'Bottle', result: 'Plant Pot' },
   { icon: Scissors, label: 'Tin Can', result: 'Lantern' },
   { icon: BookOpen, label: 'Books', result: 'Paper Beads' },
   { icon: Shirt, label: 'T-Shirt', result: 'Tote Bag' },

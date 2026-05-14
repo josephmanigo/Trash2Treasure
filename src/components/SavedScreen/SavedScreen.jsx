@@ -1,11 +1,11 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Star, Trash2, Camera, ChevronRight, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf } from 'lucide-react';
+import { ArrowLeft, Star, Trash2, Camera, ChevronRight, BottleWine, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf } from 'lucide-react';
 import './SavedScreen.css';
 
 const getObjectIcon = (label) => {
   if (!label) return <Leaf size={14} />;
   const l = label.toLowerCase();
-  if (l.includes('bottle')) return <Package size={14} />;
+  if (l.includes('bottle')) return <BottleWine size={14} />;
   if (l.includes('cup') || l.includes('container')) return <CupSoda size={14} />;
   if (l.includes('book') || l.includes('paper')) return <BookOpen size={14} />;
   if (l.includes('electronic') || l.includes('phone')) return <Smartphone size={14} />;

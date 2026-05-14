@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, ContactShadows } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Star, ChevronRight, RotateCcw, Maximize2, Share2, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug } from 'lucide-react';
+import { ArrowLeft, Star, ChevronRight, ChevronDown, ChevronUp, RotateCcw, Maximize2, Share2, BottleWine, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug } from 'lucide-react';
 import { IDEA_MODEL_MAP, MODEL_MAP } from './ideaModelMap';
 import * as THREE from 'three';
 import './ARScreen.css';
@@ -337,33 +337,23 @@ function ShadowedModel({ children }) {
 
 function AnimatedArrow() {
   const arrowRef = useRef(null);
-  const pulseRef = useRef(null);
 
   useFrame(({ clock }) => {
     const time = clock.elapsedTime;
     if (arrowRef.current) {
-      arrowRef.current.position.x = Math.sin(time * 2.8) * 0.08;
-      arrowRef.current.rotation.y = Math.sin(time * 1.6) * 0.08;
-    }
-    if (pulseRef.current) {
-      const scale = 1 + Math.sin(time * 3.2) * 0.14;
-      pulseRef.current.scale.set(scale, scale, scale);
+      arrowRef.current.position.x = Math.sin(time * 2.8) * 0.04;
     }
   });
 
   return (
-    <group ref={arrowRef} position={[0, 0.05, 0]} rotation={[0, 0, -Math.PI / 2]}>
+    <group ref={arrowRef} position={[0, 0.35, 0]} rotation={[0, 0, -Math.PI / 2]}>
       <mesh castShadow>
-        <cylinderGeometry args={[0.055, 0.055, 0.9, 24]} />
-        <meshStandardMaterial color="#22c55e" emissive="#16a34a" emissiveIntensity={0.45} roughness={0.22} metalness={0.25} />
+        <cylinderGeometry args={[0.04, 0.04, 0.7, 16]} />
+        <meshStandardMaterial color="#4ade80" roughness={0.35} metalness={0.15} />
       </mesh>
-      <mesh position={[0, 0.58, 0]} castShadow>
-        <coneGeometry args={[0.18, 0.34, 32]} />
-        <meshStandardMaterial color="#bbf7d0" emissive="#22c55e" emissiveIntensity={0.8} roughness={0.18} metalness={0.2} />
-      </mesh>
-      <mesh ref={pulseRef} position={[0, 0.04, 0]}>
-        <torusGeometry args={[0.34, 0.012, 8, 72]} />
-        <meshBasicMaterial color="#86efac" transparent opacity={0.38} />
+      <mesh position={[0, 0.45, 0]} castShadow>
+        <coneGeometry args={[0.12, 0.26, 20]} />
+        <meshStandardMaterial color="#86efac" roughness={0.3} metalness={0.1} />
       </mesh>
     </group>
   );
@@ -372,10 +362,10 @@ function AnimatedArrow() {
 function Scene({ ResultModel, detectedClass, selected }) {
   return (
     <>
-      {/* ── Realistic soft indoor lighting ── */}
+      {/* ── Realistic soft indoor lighting (no neon, no fantasy) ── */}
       <ambientLight intensity={0.55} />
-      <hemisphereLight args={['#ffffff', '#d8d0c4', 0.7]} />
-      {/* Key light: upper-left, warm daylight, casts shadows */}
+      <hemisphereLight args={['#ffffff', '#d8d8d8', 0.7]} />
+      {/* Key light: upper-left, casts shadows */}
       <directionalLight
         position={[-3, 5, 4]}
         intensity={1.2}
@@ -391,56 +381,60 @@ function Scene({ ResultModel, detectedClass, selected }) {
         shadow-bias={-0.002}
       />
       {/* Soft fill from the right */}
-      <directionalLight position={[4, 3, -2]} intensity={0.32} color="#fff8f0" />
+      <directionalLight position={[4, 3, -2]} intensity={0.3} color="#fff8f0" />
 
       <OrbitControls
         enableZoom
         enablePan={false}
         autoRotate={false}
-        minDistance={2.5}
-        maxDistance={7.0}
-        maxPolarAngle={Math.PI / 2.1}
+        minDistance={3}
+        maxDistance={10}
+        maxPolarAngle={Math.PI / 2.05}
+        minPolarAngle={0.4}
       />
 
-      {/* ── Shadow-receiving ground plane at y=0 ── */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.001, 0]} receiveShadow>
-        <planeGeometry args={[12, 12]} />
-        <shadowMaterial transparent opacity={0.28} />
+      {/* ── Invisible table/floor plane that receives shadows ── */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
+        <planeGeometry args={[8, 8]} />
+        <shadowMaterial transparent opacity={0.25} />
       </mesh>
 
-      {/* ── Models ── */}
-      {!selected && (
-        <group position={[0, 0, 0]} scale={1.05}>
-          <ShadowedModel>
-            <RawModel detectedClass={detectedClass} />
-          </ShadowedModel>
-        </group>
-      )}
-      {selected && (
-        <>
-          <group position={[-1.25, 0, 0]} scale={0.78}>
+      {/* ── Grounded model group — placed lower in viewport ── */}
+      <group position={[0, -0.75, 0]} scale={0.9}>
+        {/* ── Models grounded at y=0 ── */}
+        {!selected && (
+          <group position={[0, 0, 0]}>
             <ShadowedModel>
               <RawModel detectedClass={detectedClass} />
             </ShadowedModel>
           </group>
-          <AnimatedArrow />
-          <group position={[1.25, 0, 0]} scale={0.78}>
-            <ShadowedModel>
-              <ResultModel />
-            </ShadowedModel>
+        )}
+        {selected && (
+          <group position={[-0.05, 0, 0]}>
+            <group position={[-1.05, 0, 0]} scale={0.78}>
+              <ShadowedModel>
+                <RawModel detectedClass={detectedClass} />
+              </ShadowedModel>
+            </group>
+            <AnimatedArrow />
+            <group position={[1.05, 0, 0]} scale={0.78}>
+              <ShadowedModel>
+                <ResultModel />
+              </ShadowedModel>
+            </group>
           </group>
-        </>
-      )}
+        )}
 
-      {/* ── Soft contact shadow blob directly under objects ── */}
-      <ContactShadows
-        position={[0, 0.002, 0]}
-        opacity={0.42}
-        scale={6}
-        blur={2.2}
-        far={2.0}
-        color="#2a1a0a"
-      />
+        {/* ── Contact shadow at model base ── */}
+        <ContactShadows
+          position={[0, 0, 0]}
+          opacity={0.35}
+          scale={4}
+          blur={2.5}
+          far={2}
+          color="#1a1a1a"
+        />
+      </group>
     </>
   );
 }
@@ -448,7 +442,7 @@ function Scene({ ResultModel, detectedClass, selected }) {
 const getClassIcon = (cls) => {
   if (!cls) return <Leaf size={16} />;
   const l = cls.toLowerCase();
-  if (['bottle', 'wine glass'].includes(l)) return <Package size={16} />;
+  if (['bottle', 'wine glass'].includes(l)) return <BottleWine size={16} />;
   if (['cup', 'bowl'].includes(l)) return <CupSoda size={16} />;
   if (l === 'book') return <BookOpen size={16} />;
   if (['cell phone', 'laptop', 'keyboard', 'mouse', 'remote', 'tv', 'clock', 'hair drier'].includes(l)) return <Smartphone size={16} />;
@@ -464,6 +458,7 @@ const getClassIcon = (cls) => {
 
 const ARScreen = ({ detectionData, onBack, onViewSteps, onSave, isSaved }) => {
   const [selectedIdeaIndex, setSelectedIdeaIndex] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   if (!detectionData) return null;
   const { detection, ideas, imageSrc } = detectionData;
@@ -509,7 +504,7 @@ const ARScreen = ({ detectionData, onBack, onViewSteps, onSave, isSaved }) => {
             transition={{ duration: 0.3, ease: 'easeOut' }}
           >
             <Canvas
-              camera={{ position: [0, 1.4, 5.8], fov: 40 }}
+              camera={{ position: [0, 1.8, 8.5], fov: 48 }}
               shadows
               gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
               dpr={[1, 2]}
@@ -568,11 +563,33 @@ const ARScreen = ({ detectionData, onBack, onViewSteps, onSave, isSaved }) => {
       {/* ── Bottom Sheet ── */}
       <motion.div
         className="ar-bottom-sheet"
-        initial={{ y: 260, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: 'spring', damping: 22, stiffness: 190, delay: 0.3 }}
+        initial={{ y: 300, opacity: 0 }}
+        animate={{ y: isCollapsed ? "calc(100% - 64px)" : 0, opacity: 1 }}
+        transition={{ type: 'spring', damping: 22, stiffness: 190, delay: 0.1 }}
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={0.2}
+        onDragEnd={(e, info) => {
+          if (info.offset.y > 40 || info.velocity.y > 200) {
+            setIsCollapsed(true);
+          } else if (info.offset.y < -40 || info.velocity.y < -200) {
+            setIsCollapsed(false);
+          }
+        }}
       >
-        <div className="ar-sheet-handle" />
+        <div 
+          onClick={() => setIsCollapsed(!isCollapsed)} 
+          style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingBottom: '16px', margin: '-4px 0 8px 0' }}
+        >
+          <div style={{ width: '48px', height: '5px', background: '#22c55e', borderRadius: '4px', marginBottom: '6px' }} />
+          <div style={{ display: 'flex', alignItems: 'center', color: '#16a34a' }}>
+            {isCollapsed ? (
+              <ChevronUp size={20} strokeWidth={3} />
+            ) : (
+              <ChevronDown size={20} strokeWidth={3} />
+            )}
+          </div>
+        </div>
 
         <div className="ar-recommendation-head">
           <p className="ar-recommendation-title">Possible recyclable ideas</p>

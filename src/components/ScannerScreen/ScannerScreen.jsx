@@ -6,7 +6,7 @@ import Webcam from 'react-webcam';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import '@tensorflow/tfjs';
 import * as THREE from 'three';
-import { ArrowLeft, Zap, ZapOff, RefreshCw, Camera, Layers, Search, Package, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug } from 'lucide-react';
+import { ArrowLeft, Zap, ZapOff, RefreshCw, Camera, Layers, Search, BottleWine, CupSoda, BookOpen, Smartphone, Scissors, Shirt, Leaf, Droplets, Apple, Armchair, Heart, Plug, ChevronDown } from 'lucide-react';
 import { getIdeasForObject } from '../../data/recyclingIdeas';
 import { RawModel } from '../ARScreen/ARScreen';
 import { IDEA_MODEL_MAP, MODEL_MAP } from '../ARScreen/ideaModelMap';
@@ -26,7 +26,7 @@ const RECYCLABLE = [
 ];
 
 const DEMO_ITEMS = [
-  { class: 'bottle',     label: 'Plastic Bottle',    icon: Package,    color: '#4ade80', score: 0.94 },
+  { class: 'bottle',     label: 'Plastic Bottle',    icon: BottleWine,    color: '#4ade80', score: 0.94 },
   { class: 'cup',        label: 'Cup / Container',   icon: CupSoda,    color: '#60a5fa', score: 0.91 },
   { class: 'book',       label: 'Paper / Book',      icon: BookOpen,   color: '#f59e0b', score: 0.88 },
   { class: 'cell phone', label: 'Electronics',       icon: Smartphone, color: '#a78bfa', score: 0.90 },
@@ -192,7 +192,7 @@ function ScanARScene({ detectedClass, ResultModel, selected }) {
         enablePan={false}
         autoRotate={false}
         minDistance={3}
-        maxDistance={8.2}
+        maxDistance={10}
         maxPolarAngle={Math.PI / 1.75}
       />
       <ScanTerrain />
@@ -429,7 +429,7 @@ const ScannerScreen = ({ onBack, onDetect }) => {
             transition={{ duration: 0.28, ease: 'easeOut' }}
           >
             <Canvas
-              camera={{ position: [0, 1.25, 5.6], fov: 42 }}
+              camera={{ position: [0, 1.8, 7.5], fov: 46 }}
               shadows
               gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
               dpr={[1, 2]}
@@ -504,24 +504,7 @@ const ScannerScreen = ({ onBack, onDetect }) => {
         </motion.button>
       </div>
 
-      <AnimatePresence>
-        {!topDetection && (
-          <motion.div
-            className="scan-guide"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 12 }}
-          >
-            <p className="scan-hint">
-              {loading
-                ? 'Loading AI model...'
-                : cameraError
-                  ? 'Select an item from the demo panel below.'
-                  : 'Point the camera at a recyclable item'}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
 
       <AnimatePresence>
         {topDetection && !scanning && ideasForDetection?.ideas?.length > 0 && (
@@ -531,7 +514,28 @@ const ScannerScreen = ({ onBack, onDetect }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
             transition={{ type: 'spring', damping: 20, stiffness: 220 }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.2}
+            onDragEnd={(e, info) => {
+              if (info.offset.y > 40 || info.velocity.y > 200) {
+                setTopDetection(null);
+                setCameraError(false);
+              }
+            }}
           >
+            <div 
+              onClick={() => {
+                setTopDetection(null);
+                setCameraError(false);
+              }} 
+              style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingBottom: '16px', margin: '-4px 0 8px 0' }}
+            >
+              <div style={{ width: '48px', height: '5px', background: '#22c55e', borderRadius: '4px', marginBottom: '6px' }} />
+              <div style={{ display: 'flex', alignItems: 'center', color: '#16a34a' }}>
+                <ChevronDown size={20} strokeWidth={3} />
+              </div>
+            </div>
             <div className="scan-recommendations-header">
               <span className="scan-recommendations-icon">{getClassIcon(topDetection.class)}</span>
               <div>
@@ -601,8 +605,24 @@ const ScannerScreen = ({ onBack, onDetect }) => {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 340, opacity: 0 }}
             transition={{ type: 'spring', damping: 26, stiffness: 200 }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.2}
+            onDragEnd={(e, info) => {
+              if (info.offset.y > 40 || info.velocity.y > 200) {
+                setShowDemoPanel(false);
+              }
+            }}
           >
-            <div className="demo-panel-handle" />
+            <div 
+              onClick={() => setShowDemoPanel(false)} 
+              style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingBottom: '16px', margin: '-4px 0 8px 0' }}
+            >
+              <div style={{ width: '48px', height: '5px', background: '#22c55e', borderRadius: '4px', marginBottom: '6px' }} />
+              <div style={{ display: 'flex', alignItems: 'center', color: '#16a34a' }}>
+                <ChevronDown size={20} strokeWidth={3} />
+              </div>
+            </div>
             <div className="demo-panel-header">
               <p className="demo-panel-title">Demo Mode</p>
               <p className="demo-panel-sub">Tap any item to test the 3D AR flow</p>
