@@ -18,3 +18,5 @@ Run locally with:
 npm run dev
 npm start
 ```
+
+On Vercel, `/api/*` requests are handled by `api/[...path].js`, which imports the Express app from `server/server.js`.

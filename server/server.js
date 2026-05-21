@@ -400,6 +400,10 @@ app.use((req, res, next) => {
   }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Trash2Treasure API running on port ${PORT}`);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Trash2Treasure API running on port ${PORT}`);
+  });
+}
+
+export default app;
