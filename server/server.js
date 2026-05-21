@@ -58,6 +58,14 @@ app.use(express.json());
 // Serve React frontend in production.
 app.use(express.static(path.join(__dirname, '../dist')));
 
+app.get('/api/health', (req, res) => {
+  res.json({
+    ok: true,
+    service: 'trash2treasure-api',
+    supabaseConfigured: true,
+  });
+});
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
