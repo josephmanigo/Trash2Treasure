@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Camera, Star, HelpCircle, Leaf, TrendingUp, Recycle, ChevronRight, User } from 'lucide-react';
+import { Camera, Star, HelpCircle, Leaf, Recycle, ChevronRight, User } from 'lucide-react';
 import { api } from '../../utils/api';
 import './HomeScreen.css';
 
@@ -9,9 +9,10 @@ const ecoTips = [
   'Composting food waste reduces methane emissions significantly.',
   'Reusing a glass jar 10 times has a lower carbon footprint than recycling.',
 ];
+const tipOfDayIndex = Math.floor(Date.now() / 86400000) % ecoTips.length;
 
 const HomeScreen = ({ user, savedCount, onStartScan, onSavedIdeas, onHowItWorks, onProfile }) => {
-  const tip = ecoTips[Math.floor(Date.now() / 86400000) % ecoTips.length];
+  const tip = ecoTips[tipOfDayIndex];
   const stats = [
     { label: 'Saved Ideas',    value: savedCount || 0, icon: Star,      suffix: '' },
     { label: 'Scans Made',     value: '1.2k',          icon: Camera,    suffix: '' },

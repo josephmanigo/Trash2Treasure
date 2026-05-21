@@ -617,6 +617,7 @@ export function ApplianceModel() {
 /* ─────────────────────────────────────────
    MODEL MAP — maps detected class → component
 ───────────────────────────────────────── */
+// eslint-disable-next-line react-refresh/only-export-components
 export const MODEL_MAP = {
   bottle:      PlantPotModel,
   'wine glass': GlassTerrariumModel,

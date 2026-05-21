@@ -10,7 +10,7 @@ const features = [
   { icon: Recycle,   label: 'Eco Ideas'     },
 ];
 
-const GOOGLE_CLIENT_ID = '886898774772-le3g05q82norpn0t7jl4o3bfvlptutgu.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '886898774772-le3g05q82norpn0t7jl4o3bfvlptutgu.apps.googleusercontent.com';
 
 const LoginScreen = ({ onLogin }) => {
   const [mode, setMode] = useState(null); // null = main, 'email-login', 'email-register'
@@ -22,24 +22,48 @@ const LoginScreen = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Dynamically load Google script
+    const handleGoogleCredential = async (response) => {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await api.googleLogin(response.credential);
+        onLogin(data.user);
+      } catch (err) {
+        setError(err.message || 'Google sign-in failed');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const initializeGoogle = () => {
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredential,
+        });
+      }
+    };
+
+    window.__handleGoogleCredential = handleGoogleCredential;
+
     if (!document.getElementById('google-gsi')) {
       const script = document.createElement('script');
       script.id = 'google-gsi';
       script.src = 'https://accounts.google.com/gsi/client';
       script.async = true;
       script.defer = true;
-      script.onload = () => {
-        if (window.google?.accounts?.id) {
-          window.google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
-            callback: window.__handleGoogleCredential,
-          });
-        }
-      };
+      script.onload = initializeGoogle;
       document.head.appendChild(script);
+    } else {
+      initializeGoogle();
     }
-  }, []);
+
+    return () => {
+      if (window.__handleGoogleCredential === handleGoogleCredential) {
+        delete window.__handleGoogleCredential;
+      }
+    };
+  }, [onLogin]);
 
   const handleGoogleLogin = () => {
     if (window.google?.accounts?.id) {
@@ -51,20 +75,6 @@ const LoginScreen = ({ onLogin }) => {
     } else {
       setError('Google Sign-In is still loading. Please try again.');
     }
-  };
-
-  // This is called by the Google callback set up in App.jsx
-  // For now, we expose it via window
-  window.__handleGoogleCredential = async (response) => {
-    setLoading(true);
-    setError('');
-    try {
-      const data = await api.googleLogin(response.credential);
-      onLogin(data.user);
-    } catch (err) {
-      setError(err.message || 'Google sign-in failed');
-    }
-    setLoading(false);
   };
 
   const handleEmailSubmit = async (e) => {

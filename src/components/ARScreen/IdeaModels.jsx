@@ -57,7 +57,7 @@ export function BirdFeederModel() {
         );
       })}
       {/* Two birds */}
-      {[[-0.55, 0], [0.55, 0]].map(([x, _], i) => (
+      {[-0.55, 0.55].map((x, i) => (
         <group key={i} position={[x, 0.3, 0]}>
           <mesh>
             <sphereGeometry args={[0.1, 8, 8]} />
@@ -466,7 +466,7 @@ export function PlanterBoxModel() {
       {/* Soil */}
       <mesh position={[0, 0.22, 0]}><boxGeometry args={[1.1, 0.1, 0.6]} /><meshStandardMaterial color="#3A2310" roughness={1} /></mesh>
       {/* Plants */}
-      {[[-0.35, 'red'], [0, 'yellow'], [0.35, 'pink']].map(([x, type], i) => (
+      {[-0.35, 0, 0.35].map((x, i) => (
         <group key={i}>
           <mesh position={[x, 0.45, 0]}><cylinderGeometry args={[0.02, 0.025, 0.4, 6]} /><meshStandardMaterial color="#166534" roughness={0.7} /></mesh>
           <mesh position={[x, 0.7, 0]}><sphereGeometry args={[0.12, 10, 10]} /><meshStandardMaterial color={['#ef4444', '#eab308', '#ec4899'][i]} roughness={0.5} /></mesh>

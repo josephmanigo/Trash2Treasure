@@ -3,7 +3,7 @@
 
 import { PlantPotModel, OrganizerModel, OrigamiBoxModel,
          CircuitBoardModel, TinLanternModel, ToteBagModel,
-         RecycleSymbol, GlassTerrariumModel, OrganicCompostModel,
+         RecycleSymbol, GlassTerrariumModel,
          FurnitureShelfModel, ToyRepairModel, ApplianceModel,
          MODEL_MAP } from './Models3D';
 import { BirdFeederModel, VerticalGardenModel, SeedlingModel,

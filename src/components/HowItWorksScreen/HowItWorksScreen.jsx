@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, Camera, Sparkles, Layers, BookOpen, Brain, Star, Save, Recycle, BottleWine, CupSoda, Smartphone, Scissors, Shirt } from 'lucide-react';
+import { ArrowLeft, Camera, Sparkles, Layers, BookOpen, Brain, Save, Recycle, BottleWine, CupSoda, Smartphone, Scissors, Shirt } from 'lucide-react';
 import './HowItWorksScreen.css';
 
 const steps = [
