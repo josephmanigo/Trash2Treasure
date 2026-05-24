@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.DEV ? 'http://localhost:3001/api' : '/api';
+const API_BASE = '/api';
 const TOKEN_KEY = 't2t_token';
 const REFRESH_TOKEN_KEY = 't2t_refresh_token';
 
@@ -64,11 +64,16 @@ const fetchWithAuth = async (url, options = {}) => {
 export const api = {
   // ── Auth ──
   async register(name, email, password) {
-    const res = await fetch(`${API_BASE}/auth/register`, {
-      method: 'POST',
-      headers: headers(false),
-      body: JSON.stringify({ name, email, password }),
-    });
+    let res;
+    try {
+      res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: headers(false),
+        body: JSON.stringify({ name, email, password }),
+      });
+    } catch (err) {
+      throw new Error('Cannot reach the server. Make sure the backend is running (npm start).');
+    }
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     storeSession(data);
@@ -76,11 +81,16 @@ export const api = {
   },
 
   async login(email, password) {
-    const res = await fetch(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: headers(false),
-      body: JSON.stringify({ email, password }),
-    });
+    let res;
+    try {
+      res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: headers(false),
+        body: JSON.stringify({ email, password }),
+      });
+    } catch (err) {
+      throw new Error('Cannot reach the server. Make sure the backend is running (npm start).');
+    }
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     storeSession(data);
@@ -88,11 +98,16 @@ export const api = {
   },
 
   async googleLogin(credential) {
-    const res = await fetch(`${API_BASE}/auth/google`, {
-      method: 'POST',
-      headers: headers(false),
-      body: JSON.stringify({ credential }),
-    });
+    let res;
+    try {
+      res = await fetch(`${API_BASE}/auth/google`, {
+        method: 'POST',
+        headers: headers(false),
+        body: JSON.stringify({ credential }),
+      });
+    } catch (err) {
+      throw new Error('Cannot reach the server. Make sure the backend is running (npm start).');
+    }
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     storeSession(data);
@@ -204,7 +219,6 @@ export const api = {
   getAvatarUrl(avatar) {
     if (!avatar) return null;
     if (avatar.startsWith('http')) return avatar; // Google or Supabase Storage avatar
-    const baseUrl = import.meta.env.DEV ? 'http://localhost:3001' : '';
-    return `${baseUrl}${avatar}`;
+    return avatar;
   },
 };

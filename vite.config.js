@@ -9,6 +9,13 @@ export default defineConfig({
     host: true,
     // Required for camera access in development (HTTPS not needed on localhost)
     https: false,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   optimizeDeps: {
     // Pre-bundle heavy deps for faster cold starts
