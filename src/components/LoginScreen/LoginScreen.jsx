@@ -29,7 +29,20 @@ const LoginScreen = ({ onLogin }) => {
         const data = await api.googleLogin(response.credential);
         onLogin(data.user);
       } catch (err) {
-        setError(err.message || 'Google sign-in failed');
+        let msg = err.message || 'Google sign-in failed';
+        if (msg.includes('fetch') || msg.includes('Failed to fetch') || msg.includes('Cannot reach')) {
+          try {
+            const res = await fetch('/api/health');
+            if (res.ok) {
+              msg += ` (Diagnostics: /api/health OK)`;
+            } else {
+              msg += ` (Diagnostics: /api/health status ${res.status})`;
+            }
+          } catch (diagErr) {
+            msg += ` (Diagnostics: Cannot fetch /api/health. Page origin: ${window.location.origin})`;
+          }
+        }
+        setError(msg);
       } finally {
         setLoading(false);
       }
@@ -96,7 +109,21 @@ const LoginScreen = ({ onLogin }) => {
         onLogin(data.user);
       }
     } catch (err) {
-      setError(err.message || 'Authentication failed');
+      let msg = err.message || 'Authentication failed';
+      if (msg.includes('fetch') || msg.includes('Failed to fetch') || msg.includes('Cannot reach')) {
+        // Run diagnostics
+        try {
+          const res = await fetch('/api/health');
+          if (res.ok) {
+            msg += ` (Diagnostics: /api/health OK)`;
+          } else {
+            msg += ` (Diagnostics: /api/health status ${res.status})`;
+          }
+        } catch (diagErr) {
+          msg += ` (Diagnostics: Cannot fetch /api/health. Page origin: ${window.location.origin})`;
+        }
+      }
+      setError(msg);
     }
     setLoading(false);
   };
